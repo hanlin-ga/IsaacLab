@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/badge/license-BSD--3-yellow.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
-**Isaac Lab** just for tested is a unified and modular framework for robot learning that aims to simplify common workflows
+**Isaac Lab** is a unified and modular framework for robot learning that aims to simplify common workflows
 in robotics research (such as RL, learning from demonstrations, and motion planning). It is built upon
 [NVIDIA Isaac Sim](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html) to leverage the latest
 simulation capabilities for photo-realistic scenes and fast and accurate simulation.
