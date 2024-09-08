@@ -97,10 +97,12 @@ def main():
                 # Print the source path to textured.obj
                 print(f"Source path: {textured_obj_path}")
                 
-                # Create the corresponding destination path by replacing the base directory and file extension
-                relative_path = os.path.relpath(root, source_base_directory)
-                dest_folder = os.path.join(destination_base_directory, relative_path)
-                dest_path = os.path.join(dest_folder, 'textured.usd')
+                # Extract the parent folder name (e.g., '011_banana')
+                parent_folder_name = os.path.basename(root)
+
+                # Set the destination folder and the USD file path
+                dest_folder = os.path.join(destination_base_directory, parent_folder_name)
+                dest_path = os.path.join(dest_folder, f"{parent_folder_name}.usd")
                 
                 # Create the destination folder if it does not exist
                 if not os.path.exists(dest_folder):

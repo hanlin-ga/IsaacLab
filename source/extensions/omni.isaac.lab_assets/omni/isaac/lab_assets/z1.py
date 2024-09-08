@@ -24,7 +24,7 @@ from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 Z1_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path="/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1.usd",
+        usd_path="/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper.usd",
         activate_contact_sensors=False,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -33,16 +33,18 @@ Z1_CFG = ArticulationCfg(
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
             enabled_self_collisions=True, solver_position_iteration_count=8, solver_velocity_iteration_count=0
         ),
-        # collision_props=sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
+        collision_props=sim_utils.CollisionPropertiesCfg(contact_offset=0.005, rest_offset=0.0),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
             "joint1": 0.4,
-            "joint2": 1.4,
+            "joint2": 1.8,
             "joint3": -1.22,
             "joint4": 0.0,
             "joint5": 0.0,
             "joint6": 0.0,
+            "finger_left_joint": 0.0,
+            "finger_right_joint": 0.0,
         },
     ),
     actuators={
@@ -87,6 +89,20 @@ Z1_CFG = ArticulationCfg(
             velocity_limit=3.1415,
             stiffness=80.0,
             damping=1.0,
+        ),
+        "finger_left_joint": ImplicitActuatorCfg(                # range[0, 0.04]
+            joint_names_expr=["finger_left_joint"],
+            effort_limit=100.0,
+            velocity_limit=100,
+            stiffness=2e3,
+            damping=1e2,
+        ),
+        "finger_right_joint": ImplicitActuatorCfg(               # range[-0.04, 0]
+            joint_names_expr=["finger_right_joint"],
+            effort_limit=100.0,
+            velocity_limit=100,
+            stiffness=2e3,
+            damping=1e2,
         ),
     },
     soft_joint_pos_limit_factor=1.0,
