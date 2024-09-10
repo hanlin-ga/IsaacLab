@@ -37,14 +37,14 @@ Z1_CFG = ArticulationCfg(
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
-            "joint1": 0.4,
+            "joint1": 0.0,
             "joint2": 1.8,
             "joint3": -1.22,
             "joint4": 0.0,
             "joint5": 0.0,
-            "joint6": 0.0,
-            "finger_left_joint": 0.0,
-            "finger_right_joint": 0.0,
+            "joint6": 0.541,
+            "finger_left_joint": 0.04,
+            "finger_right_joint": -0.04,
         },
     ),
     actuators={
