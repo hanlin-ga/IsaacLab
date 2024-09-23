@@ -22,7 +22,7 @@ import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
 from omni.isaac.lab_assets import Z1_CFG
-
+import os
 
 @configclass
 class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
@@ -63,7 +63,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]),   #rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
-                usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
+                usd_path = os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/004_sugar_box.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",

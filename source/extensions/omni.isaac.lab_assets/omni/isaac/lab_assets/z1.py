@@ -17,6 +17,7 @@ import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.actuators import ImplicitActuatorCfg
 from omni.isaac.lab.assets.articulation import ArticulationCfg
 from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
+import os
 
 ##
 # Configuration
@@ -24,7 +25,7 @@ from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 Z1_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path="/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper1.usd",
+        usd_path = os.path.join(os.path.expanduser("~"), "IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper1.usd"),
         activate_contact_sensors=False,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,

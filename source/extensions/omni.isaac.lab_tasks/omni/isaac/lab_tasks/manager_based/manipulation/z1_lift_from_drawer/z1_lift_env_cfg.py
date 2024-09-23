@@ -22,7 +22,7 @@ from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.sensors import CameraCfg
-
+import os
 from . import mdp
 
 ##
@@ -57,7 +57,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Cabinet",
         spawn=sim_utils.UsdFileCfg(
             # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Sektion_Cabinet/sektion_cabinet_instanceable.usd",
-            usd_path=f"/home/hanlin/Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd",
+            usd_path = os.path.join(os.path.expanduser("~"), "Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd"),
             activate_contact_sensors=False,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
