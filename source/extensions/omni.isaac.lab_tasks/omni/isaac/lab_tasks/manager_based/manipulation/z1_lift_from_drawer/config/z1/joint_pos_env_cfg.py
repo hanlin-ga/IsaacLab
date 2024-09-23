@@ -6,14 +6,15 @@
 from omni.isaac.lab.assets import RigidObjectCfg
 from omni.isaac.lab.assets import AssetBaseCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
+from omni.isaac.lab.assets import ArticulationCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
-from omni.isaac.lab_tasks.manager_based.manipulation.lift import mdp
-from omni.isaac.lab_tasks.manager_based.manipulation.lift_z1.z1_lift_env_cfg import Z1LiftEnvCfg
+from omni.isaac.lab_tasks.manager_based.manipulation.z1_lift_from_drawer import mdp
+from omni.isaac.lab_tasks.manager_based.manipulation.z1_lift_from_drawer.z1_lift_env_cfg import Z1LiftEnvCfg
 import omni.isaac.lab.sim as sim_utils
 ##
 # Pre-defined configs
@@ -30,7 +31,19 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot",
+                                          init_state=ArticulationCfg.InitialStateCfg(
+                                              pos=(0, 0, 0.65),
+                                              joint_pos={
+                                                        "joint1": 0.0,
+                                                        "joint2": 1.2,
+                                                        "joint3": -1.6,
+                                                        "joint4": 0.0,
+                                                        "joint5": 0.0,
+                                                        "joint6": 0.0,
+                                                        "finger_.*": 0.04,
+                                                         },),
+                                          )
 
         # Set actions for the specific robot type (Z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -66,7 +79,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         # Set 006_mustard_bottleas object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.5, 0, 0.075], rot=[0.7071068, -0.7071068, 0, 0]),   #rot=[0.7071068, -0.7071068, 0, 0]
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]),   #rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
                 usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
@@ -74,7 +87,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
                 # usd_path=f"/home/hanlin/Downloads/Blocks/DexCube/dex_cube_instanceable.usd",
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
+                scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,

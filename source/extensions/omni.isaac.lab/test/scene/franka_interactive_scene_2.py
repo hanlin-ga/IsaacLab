@@ -47,6 +47,7 @@ from omni.isaac.lab.assets import DeformableObject, DeformableObjectCfg
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.anymal import ANYMAL_C_CFG  # isort: skip
+from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG
 from omni.isaac.lab_assets import Z1_CFG
 from omni.isaac.lab.sim import PreviewSurfaceCfg
 
@@ -78,7 +79,7 @@ class MySceneCfg(InteractiveSceneCfg):
     # )
 
     # articulation - robot 1
-    robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+    robot = FRANKA_PANDA_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
     robot.init_state.pos = (0.0, 0.0, 0.76)
 
     # extras - light
@@ -101,19 +102,19 @@ class MySceneCfg(InteractiveSceneCfg):
     #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
     # )
     # extras - YCB
-    YCB = AssetBaseCfg(
-        prim_path="{ENV_REGEX_NS}/YCB",
-        # spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableD.usd"),
-        spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb2.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90))
-    )
+    # YCB = AssetBaseCfg(
+    #     prim_path="{ENV_REGEX_NS}/YCB",
+    #     # spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableD.usd"),
+    #     spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb2.usd"),
+    #     init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90))
+    # )
 
-    # extras - table
-    table = AssetBaseCfg(
-        prim_path="{ENV_REGEX_NS}/Table",
-        spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0))
-    )
+    # # extras - table
+    # table = AssetBaseCfg(
+    #     prim_path="{ENV_REGEX_NS}/Table",
+    #     spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"),
+    #     init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0))
+    # )
 
 
 def main():
@@ -180,10 +181,10 @@ def main():
             
             if gripper_count > 150:
                 joint_pos_target[:, 6] = 0.04
-                # joint_pos_target[:, 7] = -0.04
+                joint_pos_target[:, 7] = -0.04
             else: 
                 joint_pos_target[:, 6] = 0
-                # joint_pos_target[:, 7] = 0
+                joint_pos_target[:, 7] = 0
 
             # set joint targets
             scene.articulations["robot"].set_joint_position_target(joint_pos_target)
@@ -196,7 +197,7 @@ def main():
 
 
             # print information from the sensors
-            # print("-------------------------------")
+            print("-------------------------------")
             # print(scene["camera"])
             # print("Received shape of rgb   image: ", scene["camera"].data.output["rgb"].shape)
             # print("Received shape of depth image: ", scene["camera"].data.output["distance_to_image_plane"].shape)

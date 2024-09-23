@@ -6,6 +6,7 @@
 from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
+from omni.isaac.lab.actuators.actuator_cfg import ImplicitActuatorCfg
 from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
@@ -46,11 +47,47 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # object: AssetBaseCfg = MISSING
 
     # Table
-    table = AssetBaseCfg(
-        prim_path="{ENV_REGEX_NS}/Table",
-        init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
-        spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+    # table = AssetBaseCfg(
+    #     prim_path="{ENV_REGEX_NS}/Table",
+    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
+    #     spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+    # )
+
+    cabinet = ArticulationCfg(
+        prim_path="{ENV_REGEX_NS}/Cabinet",
+        spawn=sim_utils.UsdFileCfg(
+            # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Sektion_Cabinet/sektion_cabinet_instanceable.usd",
+            usd_path=f"/home/hanlin/Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd",
+            activate_contact_sensors=False,
+        ),
+        init_state=ArticulationCfg.InitialStateCfg(
+            pos=(0.85, 0, 0.4),
+            rot=(0.0, 0.0, 0.0, 1.0),
+            joint_pos={
+                "door_left_joint": 0.0,
+                "door_right_joint": 0.0,
+                "drawer_bottom_joint": 0.0,
+                "drawer_top_joint": 0.4,
+            },
+        ),
+        actuators={
+            "drawers": ImplicitActuatorCfg(
+                joint_names_expr=["drawer_top_joint", "drawer_bottom_joint"],  #joint_names_expr=["drawer_top_joint", "drawer_bottom_joint"],
+                effort_limit=87.0,
+                velocity_limit=100.0,
+                stiffness=10.0,
+                damping=1.0,
+            ),
+            "doors": ImplicitActuatorCfg(
+                joint_names_expr=["door_left_joint", "door_right_joint"],
+                effort_limit=87.0,
+                velocity_limit=100.0,
+                stiffness=10.0,
+                damping=2.5,
+            ),
+        },
     )
+
 
     # plane
     plane = AssetBaseCfg(
@@ -95,7 +132,7 @@ class CommandsCfg:
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.5), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.4), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.3, 0.4), pos_y=(-0.25, 0.25), pos_z=(0.4, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -141,7 +178,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+            "pose_range": {"x": (-0.03, 0.03), "y": (-0.15, 0.15), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -153,17 +190,17 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.15}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.8}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.15, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.8, "command_name": "object_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.15, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.8, "command_name": "object_pose"},
         weight=5.0,
     )
 
@@ -188,7 +225,7 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
     object_dropping = DoneTerm(
-        func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
+        func=mdp.root_height_below_minimum, params={"minimum_height": 0.55, "asset_cfg": SceneEntityCfg("object")}
     )
 
 

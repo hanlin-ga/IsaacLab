@@ -6,10 +6,11 @@
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.utils import configclass
+from omni.isaac.lab.assets import ArticulationCfg
+from omni.isaac.lab_tasks.manager_based.manipulation.cabinet_z1 import mdp
+from omni.isaac.lab_assets import Z1_CFG
 
-from omni.isaac.lab_tasks.manager_based.manipulation.cabinet import mdp
-
-from omni.isaac.lab_tasks.manager_based.manipulation.cabinet.cabinet_env_cfg import (  # isort: skip
+from omni.isaac.lab_tasks.manager_based.manipulation.cabinet_z1.cabinet_env_cfg import (  # isort: skip
     FRAME_MARKER_SMALL_CFG,
     CabinetEnvCfg,
 )
@@ -21,55 +22,60 @@ from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
 
 
 @configclass
-class FrankaCabinetEnvCfg(CabinetEnvCfg):
+class Z1CabinetEnvCfg(CabinetEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
 
-        # Set franka as robot
-        self.scene.robot = FRANKA_PANDA_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        # Set z1 as robot
+        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot",
+                                          init_state=ArticulationCfg.InitialStateCfg(pos=(0, 0, 0.45)))
+            
 
-        # Set Actions for the specific robot type (franka)
+        # Set Actions for the specific robot type (z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
             asset_name="robot",
-            joint_names=["panda_joint.*"],
+            joint_names=["joint.*"],
             scale=1.0,
             use_default_offset=True,
         )
         self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
-            joint_names=["panda_finger.*"],
-            open_command_expr={"panda_finger_.*": 0.04},
-            close_command_expr={"panda_finger_.*": 0.0},
+            joint_names=["finger_.*"],
+            open_command_expr={"finger_.*": 0.04},
+            close_command_expr={"finger_.*": 0.0},
         )
+
+        # Set the body name for the end effector
+        # self.commands.object_pose.body_name = "gripper_link"
 
         # Listens to the required transforms
         # IMPORTANT: The order of the frames in the list is important. The first frame is the tool center point (TCP)
         # the other frames are the fingers
         self.scene.ee_frame = FrameTransformerCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/panda_link0",
+            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
             debug_vis=True,
             visualizer_cfg=FRAME_MARKER_SMALL_CFG.replace(prim_path="/Visuals/EndEffectorFrameTransformer"),
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/panda_hand",
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="ee_tcp",
                     offset=OffsetCfg(
-                        pos=(0.0, 0.0, 0.1034),
+                        pos=(0.18, 0.0, 0),
                     ),
                 ),
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/panda_leftfinger",
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/finger_left_link",
                     name="tool_leftfinger",
                     offset=OffsetCfg(
-                        pos=(0.0, 0.0, 0.046),
+                        pos=(0.18, 0.0, 0),
                     ),
                 ),
                 FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/panda_rightfinger",
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/finger_right_link",
                     name="tool_rightfinger",
                     offset=OffsetCfg(
-                        pos=(0.0, 0.0, 0.046),
+                        pos=(0.18, 0.0, 0),
                     ),
                 ),
             ],
@@ -78,11 +84,11 @@ class FrankaCabinetEnvCfg(CabinetEnvCfg):
         # override rewards
         self.rewards.approach_gripper_handle.params["offset"] = 0.04
         self.rewards.grasp_handle.params["open_joint_pos"] = 0.04
-        self.rewards.grasp_handle.params["asset_cfg"].joint_names = ["panda_finger_.*"]
+        self.rewards.grasp_handle.params["asset_cfg"].joint_names = ["finger_.*"]
 
 
 @configclass
-class FrankaCabinetEnvCfg_PLAY(FrankaCabinetEnvCfg):
+class Z1CabinetEnvCfg_PLAY(Z1CabinetEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()

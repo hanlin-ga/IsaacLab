@@ -3,8 +3,8 @@ params:
 
   # environment wrapper clipping
   env:
-    clip_observations: 100.0
-    clip_actions: 100.0
+    clip_observations: 5.0
+    clip_actions: 1.0
 
   algo:
     name: a2c_continuous
@@ -15,11 +15,11 @@ params:
   network:
     name: actor_critic
     separate: False
+
     space:
       continuous:
         mu_activation: None
         sigma_activation: None
-
         mu_init:
           name: default
         sigma_init:
@@ -36,44 +36,41 @@ params:
       regularizer:
         name: None
 
-  load_checkpoint: False # flag which sets whether to load the checkpoint
-  load_path: '' # path to the checkpoint to load
+  load_checkpoint: False
+  load_path: ''
 
   config:
-    name: z1_lift_drawer
+    name: franka_open_drawer
     env_name: rlgpu
     device: 'cuda:0'
     device_name: 'cuda:0'
     multi_gpu: False
     ppo: True
     mixed_precision: False
-    normalize_input: True
-    normalize_value: True
-    value_bootstrap: False
-    num_actors: -1
+    normalize_input: False
+    normalize_value: False
+    num_actors: -1  # configured from the script (based on num_envs)
     reward_shaper:
-      scale_value: 0.01
-    normalize_advantage: True
+      scale_value: 1
+    normalize_advantage: False
     gamma: 0.99
     tau: 0.95
-    learning_rate: 1e-4
+    learning_rate: 5e-4
     lr_schedule: adaptive
-    schedule_type: legacy
-    kl_threshold: 0.01
-    score_to_win: 100000000
-    max_epochs: 1500
-    save_best_after: 100
+    kl_threshold: 0.008
+    score_to_win: 200
+    max_epochs: 400
+    save_best_after: 50
     save_frequency: 50
     print_stats: True
     grad_norm: 1.0
     entropy_coef: 0.001
     truncate_grads: True
     e_clip: 0.2
-    horizon_length: 24
-    minibatch_size: 24576
-    mini_epochs: 8
+    horizon_length: 96
+    minibatch_size: 4096
+    mini_epochs: 5
     critic_coef: 4
     clip_value: True
-    clip_actions: False
-    seq_len: 4
+    seq_length: 4
     bounds_loss_coef: 0.0001

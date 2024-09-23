@@ -36,16 +36,22 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.actions.arm_action = mdp.JointPositionActionCfg(
             asset_name="robot", joint_names=["joint.*"], scale=0.5, use_default_offset=True
         )
-        self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
+        self.actions.left_gripper_action = mdp.BinaryJointPositionActionCfg(
             asset_name="robot",
-            joint_names=["finger_.*"],
-            open_command_expr={"finger_.*": 0.04},
-            close_command_expr={"finger_.*": 0.0},
+            joint_names=["finger_left.*"],
+            open_command_expr={"finger_left.*": 0.04},
+            close_command_expr={"finger_left.*": 0.0},
+        )
+        self.actions.right_gripper_action = mdp.BinaryJointPositionActionCfg(
+            asset_name="robot",
+            joint_names=["finger_right.*"],
+            open_command_expr={"finger_right.*": -0.04},
+            close_command_expr={"finger_right.*": 0.0},
         )
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
 
-        # Set Cube as object 
+        # Set Cube as object
         # self.scene.object = RigidObjectCfg(
         #     prim_path="{ENV_REGEX_NS}/Object",
         #     init_state=RigidObjectCfg.InitialStateCfg(pos=[0.5, 0, 0.055], rot=[1, 0, 0, 0]),
@@ -68,10 +74,10 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(pos=[0.5, 0, 0.075], rot=[0.7071068, -0.7071068, 0, 0]),   #rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
-                usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
-                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
+                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
+                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned_Physics/005_tomato_soup_can.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/004_sugar_box.usd",
-                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
+                usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
                 # usd_path=f"/home/hanlin/Downloads/Blocks/DexCube/dex_cube_instanceable.usd",
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(1.0, 1.0, 1.0),
