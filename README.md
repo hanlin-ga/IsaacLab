@@ -1,9 +1,10 @@
+# To Run Z1 Manipulator Pick-and-Place Object Simulation
 
-# To Run Z1 manipulator pick-and-place object simulation
-You will first need change my user name to be yours under the following three files.
-1, Modify z1.py under `/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets`
-2, Modify z1_lift_env_cfg.py under `/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_tasks/omni/isaac/lab_tasks/manager_based/manipulation/z1_lift_from_drawer`
-3, Modify joint_pos_env_cfg.py under `/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_tasks/omni/isaac/lab_tasks/manager_based/manipulation/z1_lift_from_drawer/config/z1`
+1. Download the `YCB` and `Sektion_Cabinet` folders and place them under your `Downloads` folder. 
 
-Then run: `./isaaclab.sh -p source/standalone/workflows/rsl_rl/play.py --task Isaac-Lift-Cube-from-drawer-Z1-v0 --num_envs 16`
+2. Ensure the code dynamically accesses the correct user directory by using environment variables or Python's dynamic directory handling (e.g., `os.path.expanduser("~")`).
 
+3. Then run the following command to start the simulation:
+
+   ```bash
+   ./isaaclab.sh -p source/standalone/workflows/rsl_rl/play.py --task Isaac-Lift-Cube-from-drawer-Z1-v0 --num_envs 16
