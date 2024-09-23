@@ -5,6 +5,8 @@
 
 import math
 
+from omni.isaac.lab_assets import Z1_CFG
+
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
@@ -15,9 +17,10 @@ from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
-from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.sensors import CameraCfg
+from omni.isaac.lab.sim import PreviewSurfaceCfg
 from omni.isaac.lab.terrains import TerrainImporterCfg
+from omni.isaac.lab.utils import configclass
 
 import omni.isaac.lab_tasks.manager_based.classic.z1.mdp as mdp
 
@@ -25,8 +28,6 @@ import omni.isaac.lab_tasks.manager_based.classic.z1.mdp as mdp
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.cartpole import CARTPOLE_CFG  # isort:skip
-from omni.isaac.lab_assets import Z1_CFG
-from omni.isaac.lab.sim import PreviewSurfaceCfg
 
 
 ##
@@ -42,7 +43,7 @@ class Z1SceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="plane",
-        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0))
+        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0)),
     )
 
     # z1 robot
@@ -76,14 +77,16 @@ class Z1SceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/YCB",
         # spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableD.usd"),
         spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb2.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90))
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90)),
     )
 
     # extras - table
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
-        spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0))
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
     )
 
 
@@ -104,8 +107,12 @@ class CommandsCfg:
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    finger_left_joint_effort = mdp.JointEffortActionCfg(asset_name="robot", joint_names=["finger_left_joint"], scale=100.0)
-    finger_right_joint_effort = mdp.JointEffortActionCfg(asset_name="robot", joint_names=["finger_right_joint"], scale=100.0)
+    finger_left_joint_effort = mdp.JointEffortActionCfg(
+        asset_name="robot", joint_names=["finger_left_joint"], scale=100.0
+    )
+    finger_right_joint_effort = mdp.JointEffortActionCfg(
+        asset_name="robot", joint_names=["finger_right_joint"], scale=100.0
+    )
 
 
 @configclass
@@ -143,26 +150,27 @@ class EventCfg:
     )
 
 
-
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
 
     # (1) Constant running reward
-    alive = RewTerm(func=mdp.is_alive, weight=1.0)   # 1.0
+    alive = RewTerm(func=mdp.is_alive, weight=1.0)  # 1.0
     # (2) Failure penalty
     terminating = RewTerm(func=mdp.is_terminated, weight=-2.0)  # -2.0
     # (3) distance reward
-    distance_reward = RewTerm(func=mdp.check_distance_to_target, 
-                              weight=1.0,
-                              params={"asset_cfg": SceneEntityCfg("robot", joint_names=["finger_left_joint"]), "target": 0.0},)
-    
+    distance_reward = RewTerm(
+        func=mdp.check_distance_to_target,
+        weight=1.0,
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["finger_left_joint"]), "target": 0.0},
+    )
+
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    
-    
-    # distance_reward = RewTerm(func=mdp.root_pos_w, 
+
+    # distance_reward = RewTerm(func=mdp.root_pos_w,
     #                           weight=1.0,
     #                           params={"asset_cfg": SceneEntityCfg("robot")},)
+
 
 @configclass
 class TerminationsCfg:

@@ -1,3 +1,8 @@
+# Copyright (c) 2022-2024, The Isaac Lab Project Developers.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 import argparse
 
 from omni.isaac.lab.app import AppLauncher
@@ -16,14 +21,15 @@ simulation_app = app_launcher.app
 """Rest everything follows."""
 
 
-import omni.isaac.core.utils.prims as prim_utils
-from omni.isaac.kit import SimulationApp
-from omni.isaac.core.utils.stage import open_stage, save_stage
-from omni.isaac.core.utils.prims import create_prim
-from pxr import UsdGeom, PhysxSchema
 import os
-import omni.isaac.core.utils.prims as prims_utils
 import re
+
+import omni.isaac.core.utils.prims as prim_utils
+import omni.isaac.core.utils.prims as prims_utils
+from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.utils.stage import open_stage, save_stage
+from omni.isaac.kit import SimulationApp
+from pxr import PhysxSchema, UsdGeom
 
 # Open a new or existing stage
 open_stage("/home/hanlin/Learn_isaac_sim/newstage.usd")
@@ -43,7 +49,7 @@ for subdir, dirs, files in os.walk(base_dir):
     if "google_16k" in dirs:
         obj_file_path = os.path.join(subdir, "google_16k", "textured.obj")
         print(f"Found google_16k directory in: {subdir}")
-        
+
         if os.path.exists(obj_file_path):
             print(f"Found textured.obj: {obj_file_path}")
             # Append the obj file path to the list
@@ -54,9 +60,8 @@ for subdir, dirs, files in os.walk(base_dir):
             dest_file_path = os.path.join(save_dir, f"{relative_subdir}.usd")
             dest_paths.append(dest_file_path)
 
-
-            cleaned_subdir_name = relative_subdir.replace('/', '').replace('_', '').replace('-', '')
-            cleaned_subdir_name = re.sub(r'\d+', '', cleaned_subdir_name)
+            cleaned_subdir_name = relative_subdir.replace("/", "").replace("_", "").replace("-", "")
+            cleaned_subdir_name = re.sub(r"\d+", "", cleaned_subdir_name)
             prim_path = f"/World/{cleaned_subdir_name}Model"
             obj_path = obj_file_path
 
@@ -77,7 +82,6 @@ for subdir, dirs, files in os.walk(base_dir):
 
             save_stage(dest_file_path)
             prims_utils.delete_prim(prim_path)
-
 
             # Ensure the destination directory exists
             dest_dir = os.path.dirname(dest_file_path)

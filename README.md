@@ -1,6 +1,6 @@
 # To Run Z1 Manipulator Pick-and-Place Object Simulation
 
-1. Download the `YCB` and `Sektion_Cabinet` folders from shared google drive link and place them under your `Downloads` folder. 
+1. Download the `YCB` and `Sektion_Cabinet` folders from shared google drive link and place them under your `Downloads` folder.
 
 2. Ensure the code dynamically accesses the correct user directory by using environment variables or Python's dynamic directory handling (e.g., `os.path.expanduser("~")`).
 

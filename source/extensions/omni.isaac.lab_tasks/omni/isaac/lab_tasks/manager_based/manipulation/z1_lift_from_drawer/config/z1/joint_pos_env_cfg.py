@@ -3,10 +3,13 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-from omni.isaac.lab.assets import RigidObjectCfg
-from omni.isaac.lab.assets import AssetBaseCfg
+import os
+
+from omni.isaac.lab_assets import Z1_CFG
+
+import omni.isaac.lab.sim as sim_utils
+from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
-from omni.isaac.lab.assets import ArticulationCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
@@ -15,14 +18,13 @@ from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from omni.isaac.lab_tasks.manager_based.manipulation.z1_lift_from_drawer import mdp
 from omni.isaac.lab_tasks.manager_based.manipulation.z1_lift_from_drawer.z1_lift_env_cfg import Z1LiftEnvCfg
-import omni.isaac.lab.sim as sim_utils
+
 ##
 # Pre-defined configs
 ##
 from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
-from omni.isaac.lab_assets import Z1_CFG
-import os
+
 
 @configclass
 class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
@@ -31,19 +33,21 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot",
-                                          init_state=ArticulationCfg.InitialStateCfg(
-                                              pos=(0, 0, 0.65),
-                                              joint_pos={
-                                                        "joint1": 0.0,
-                                                        "joint2": 1.2,
-                                                        "joint3": -1.6,
-                                                        "joint4": 0.0,
-                                                        "joint5": 0.0,
-                                                        "joint6": 0.0,
-                                                        "finger_.*": 0.04,
-                                                         },),
-                                          )
+        self.scene.robot = Z1_CFG.replace(
+            prim_path="{ENV_REGEX_NS}/Robot",
+            init_state=ArticulationCfg.InitialStateCfg(
+                pos=(0, 0, 0.65),
+                joint_pos={
+                    "joint1": 0.0,
+                    "joint2": 1.2,
+                    "joint3": -1.6,
+                    "joint4": 0.0,
+                    "joint5": 0.0,
+                    "joint6": 0.0,
+                    "finger_.*": 0.04,
+                },
+            ),
+        )
 
         # Set actions for the specific robot type (Z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -61,9 +65,11 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         # Set 006_mustard_bottleas object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]),   #rot=[0.7071068, -0.7071068, 0, 0]
+            init_state=RigidObjectCfg.InitialStateCfg(
+                pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]
+            ),  # rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
-                usd_path = os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
+                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/004_sugar_box.usd",
                 # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
@@ -93,9 +99,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="end_effector",
-                    offset=OffsetCfg(
-                        pos=[0.18, 0.0, 0.0],rot=[0, 1, 0, 0]
-                    ),
+                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[0, 1, 0, 0]),
                 ),
             ],
         )

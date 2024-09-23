@@ -8,12 +8,10 @@ from __future__ import annotations
 import torch
 from typing import TYPE_CHECKING
 
-from omni.isaac.lab.assets import Articulation
+from omni.isaac.lab.assets import Articulation, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
-from omni.isaac.lab.utils.math import wrap_to_pi
-from omni.isaac.lab.assets import RigidObject
 from omni.isaac.lab.sensors import FrameTransformer
-
+from omni.isaac.lab.utils.math import wrap_to_pi
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -41,6 +39,7 @@ def check_distance_to_target(env: ManagerBasedRLEnv, target: float, asset_cfg: S
     print("asset.data.root_pos_w is ", asset.data.root_pos_w)
     # compute the reward
     return torch.sum(torch.square(joint_pos - target), dim=1)
+
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,

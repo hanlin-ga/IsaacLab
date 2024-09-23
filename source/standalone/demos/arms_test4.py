@@ -1,3 +1,8 @@
+# Copyright (c) 2022-2024, The Isaac Lab Project Developers.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 import argparse
 import time
 
@@ -19,30 +24,26 @@ import numpy as np
 import torch
 
 import omni.isaac.core.utils.prims as prim_utils
-from omni.isaac.core.utils.prims import create_prim
-from omni.isaac.core.utils.stage import add_reference_to_stage
-from pxr import Gf
-
+import omni.kit
+import omni.usd
 from omni.isaac.core.objects import DynamicCuboid
 from omni.isaac.core.objects.ground_plane import GroundPlane
 from omni.isaac.core.physics_context import PhysicsContext
-from pxr import UsdGeom, Gf, Sdf, Usd
-import omni.usd
+from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.usd import get_context
-import omni.kit
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from pxr import Usd, UsdGeom, Sdf, PhysxSchema, UsdPhysics, UsdShade
 
 ##
 # Pre-defined configs
 ##
 # isort: off
-from omni.isaac.lab_assets import (
-    Z1_CFG
-)
+from omni.isaac.lab_assets import Z1_CFG
+
 
 def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     """Defines the origins of the the scene."""
@@ -56,12 +57,12 @@ def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     env_origins[:, 1] = spacing * yy.flatten()[:num_origins] - spacing * (num_cols - 1) / 2
     env_origins[:, 2] = 0.0
     # return the origins
-    print('num_rows is :', num_rows )
-    print('num_cols is :', num_cols )
+    print("num_rows is :", num_rows)
+    print("num_cols is :", num_cols)
     return env_origins.tolist()
 
-def design_scene() -> tuple[dict, list[list[float]]]:
 
+def design_scene() -> tuple[dict, list[list[float]]]:
     """Designs the scene."""
     # Ground-plane
     # cfg = sim_utils.GroundPlaneCfg()
@@ -92,11 +93,9 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     print("origins[0] is ", origins[0])
 
     # return the scene information
-    scene_entities = {
-        "z1": z1,
-        "z1_1": z1_1
-    }
+    scene_entities = {"z1": z1, "z1_1": z1_1}
     return scene_entities, origins
+
 
 def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articulation], origins: torch.Tensor):
     """Runs the simulation loop."""
@@ -137,10 +136,11 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
         # root_state[:, :3] += origins[index]
         # print("After origin, Robot root_state[:, :3] is ", root_state[:, :3])
 
-        if index==0:
-            root_state[:, :3] = torch.tensor([[0.08, 1.0, 0.76]], device='cuda:0')
-        else: root_state[:, :3] = torch.tensor([[1.28, 1.0, 0.76]], device='cuda:0')
-        
+        if index == 0:
+            root_state[:, :3] = torch.tensor([[0.08, 1.0, 0.76]], device="cuda:0")
+        else:
+            root_state[:, :3] = torch.tensor([[1.28, 1.0, 0.76]], device="cuda:0")
+
         robot.write_root_state_to_sim(root_state)
         # set joint positions
         joint_pos, joint_vel = robot.data.default_joint_pos.clone(), robot.data.default_joint_vel.clone()
@@ -165,7 +165,6 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
         #     print("Table 2 is reset")
         #     sim.play()
 
-
         # apply random actions to the robots
         for robot in entities.values():
             # generate random joint positions
@@ -180,11 +179,11 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
             robot.write_data_to_sim()
         # perform step
         sim.step()
-        
+
         # update sim-time
         sim_time += sim_dt
         count += 1
-        count1+= 1
+        count1 += 1
         # update buffers
         for robot in entities.values():
             robot.update(sim_dt)
@@ -195,14 +194,12 @@ def main():
     # Initialize the simulation context
     sim_cfg = sim_utils.SimulationCfg()
     sim = sim_utils.SimulationContext(sim_cfg)
-    
 
     # Set main camera
     sim.set_camera_view([3.5, 0.0, 3.2], [0.0, 0.0, 0.5])
     # design scene
     scene_entities, scene_origins = design_scene()
     scene_origins = torch.tensor(scene_origins, device=sim.device)
-
 
     # Access the USD stage
     stage = omni.usd.get_context().get_stage()
@@ -214,7 +211,6 @@ def main():
     # Add a reference to the additional USD file
     reference_prim.GetReferences().AddReference(usd_file_path)
 
-
     usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
     prim_path = "/World/SecondStage"
     # Create a new prim in the stage to hold the reference
@@ -225,7 +221,6 @@ def main():
     translation = Gf.Vec3d(1.2, 0.0, 0.485)  # Example translation vector
     xform_api = UsdGeom.XformCommonAPI(reference_prim)
     xform_api.SetTranslate(translation)
-
 
     usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
     prim_path = "/World/ThirdStage"

@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
 from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
@@ -17,12 +18,12 @@ from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
+from omni.isaac.lab.sensors import CameraCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import FrameTransformerCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from omni.isaac.lab.sensors import CameraCfg
-import os
+
 from . import mdp
 
 ##
@@ -57,7 +58,9 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Cabinet",
         spawn=sim_utils.UsdFileCfg(
             # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Sektion_Cabinet/sektion_cabinet_instanceable.usd",
-            usd_path = os.path.join(os.path.expanduser("~"), "Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd"),
+            usd_path=os.path.join(
+                os.path.expanduser("~"), "Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd"
+            ),
             activate_contact_sensors=False,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
@@ -72,7 +75,10 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         ),
         actuators={
             "drawers": ImplicitActuatorCfg(
-                joint_names_expr=["drawer_top_joint", "drawer_bottom_joint"],  #joint_names_expr=["drawer_top_joint", "drawer_bottom_joint"],
+                joint_names_expr=[
+                    "drawer_top_joint",
+                    "drawer_bottom_joint",
+                ],  # joint_names_expr=["drawer_top_joint", "drawer_bottom_joint"],
                 effort_limit=87.0,
                 velocity_limit=100.0,
                 stiffness=10.0,
@@ -87,7 +93,6 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             ),
         },
     )
-
 
     # plane
     plane = AssetBaseCfg(
@@ -217,7 +222,6 @@ class RewardsCfg:
     # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
 
 
-
 @configclass
 class TerminationsCfg:
     """Termination terms for the MDP."""
@@ -249,6 +253,7 @@ class CurriculumCfg:
     #     func=mdp.modify_reward_weight, params={"term_name": "final_joint_vel", "weight": -1e-3, "num_steps": 10000}
     # )
 
+
 ##
 # Environment configuration
 ##
@@ -259,7 +264,7 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lifting environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)   # 4096
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)  # 4096
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()

@@ -1,3 +1,7 @@
+# Copyright (c) 2022-2024, The Isaac Lab Project Developers.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
 
@@ -52,6 +56,7 @@ from omni.isaac.lab.sim.schemas import schemas_cfg
 from omni.isaac.lab.utils.assets import check_file_path
 from omni.isaac.lab.utils.dict import print_dict
 
+
 def main():
     # check valid file path
     mesh_path = args_cli.input
@@ -80,7 +85,6 @@ def main():
     # Collision properties
     collision_props = schemas_cfg.CollisionPropertiesCfg(collision_enabled=args_cli.collision_approximation != "none")
 
-
     # Set the path to the ycb_test directory
     source_base_directory = "/home/hanlin/ycb_test"
     destination_base_directory = "/home/hanlin/ycb_result"
@@ -88,30 +92,29 @@ def main():
     # Loop through all subdirectories in the base directory
     for root, dirs, files in os.walk(source_base_directory):
         # Check if the current directory contains a folder named 'google_16k'
-        if 'google_16k' in dirs:
+        if "google_16k" in dirs:
             # Build the source path to the textured.obj file
-            textured_obj_path = os.path.join(root, 'google_16k', 'textured.obj')
-            
+            textured_obj_path = os.path.join(root, "google_16k", "textured.obj")
+
             # Check if textured.obj exists in the google_16k folder
             if os.path.isfile(textured_obj_path):
                 # Print the source path to textured.obj
                 print(f"Source path: {textured_obj_path}")
-                
+
                 # Extract the parent folder name (e.g., '011_banana')
                 parent_folder_name = os.path.basename(root)
 
                 # Set the destination folder and the USD file path
                 dest_folder = os.path.join(destination_base_directory, parent_folder_name)
                 dest_path = os.path.join(dest_folder, f"{parent_folder_name}.usd")
-                
+
                 # Create the destination folder if it does not exist
                 if not os.path.exists(dest_folder):
                     os.makedirs(dest_folder)
                     print(f"Created folder: {dest_folder}")
-                
+
                 # Print the destination path
                 print(f"Destination path: {dest_path}")
-
 
                 # Create Mesh converter config
                 mesh_converter_cfg = MeshConverterCfg(
@@ -157,5 +160,3 @@ if __name__ == "__main__":
     main()
     # close sim app
     simulation_app.close()
-
-

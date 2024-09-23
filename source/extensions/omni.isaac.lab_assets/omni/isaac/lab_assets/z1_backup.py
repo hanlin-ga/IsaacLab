@@ -90,14 +90,14 @@ Z1_CFG = ArticulationCfg(
             stiffness=631.0,
             damping=63.8,
         ),
-        "finger_left_joint": ImplicitActuatorCfg(                # range[0, 0.04]
+        "finger_left_joint": ImplicitActuatorCfg(  # range[0, 0.04]
             joint_names_expr=["finger_left_joint"],
             effort_limit=100,
             velocity_limit=100,
             stiffness=1e4,
             damping=1e2,
         ),
-        "finger_right_joint": ImplicitActuatorCfg(               # range[-0.04, 0]
+        "finger_right_joint": ImplicitActuatorCfg(  # range[-0.04, 0]
             joint_names_expr=["finger_right_joint"],
             effort_limit=100,
             velocity_limit=100,
@@ -107,4 +107,3 @@ Z1_CFG = ArticulationCfg(
     },
 )
 """Configuration of Z1 robot."""
-

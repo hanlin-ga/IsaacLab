@@ -28,28 +28,27 @@ simulation_app = app_launcher.app
 
 """Rest everything follows."""
 
+import time
+
+from omni.isaac.lab_assets import Z1_CFG
+
+import omni.isaac.lab.envs.mdp as mdp
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import AssetBaseCfg, RigidObjectCfg
-from omni.isaac.lab.scene import InteractiveScene, InteractiveSceneCfg
+from omni.isaac.lab.assets import AssetBaseCfg, DeformableObject, DeformableObjectCfg, RigidObjectCfg
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
 from omni.isaac.lab.managers import SceneEntityCfg
-from omni.isaac.lab.sensors.ray_caster import RayCasterCfg, patterns
-import omni.isaac.lab.envs.mdp as mdp
+from omni.isaac.lab.scene import InteractiveScene, InteractiveSceneCfg
 from omni.isaac.lab.sensors import CameraCfg
-from omni.isaac.lab.sim import SimulationContext
+from omni.isaac.lab.sensors.ray_caster import RayCasterCfg, patterns
+from omni.isaac.lab.sim import PreviewSurfaceCfg, SimulationContext
 from omni.isaac.lab.terrains import TerrainImporterCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.timer import Timer
-import time
-from omni.isaac.lab.assets import DeformableObject, DeformableObjectCfg
 
 ##
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.anymal import ANYMAL_C_CFG  # isort: skip
-from omni.isaac.lab_assets import Z1_CFG
-from omni.isaac.lab.sim import PreviewSurfaceCfg
-
 
 
 @configclass
@@ -60,7 +59,7 @@ class MySceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="plane",
-        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0))
+        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0)),
     )
 
     # add cube
@@ -85,7 +84,9 @@ class MySceneCfg(InteractiveSceneCfg):
     light = AssetBaseCfg(
         prim_path="/World/light",
         spawn=sim_utils.DistantLightCfg(intensity=5000.0, color=(0.75, 0.75, 0.75)),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 100.0), rot=(0.6532815 , 0.2705981, 0.2705981, 0.6532815)),
+        init_state=AssetBaseCfg.InitialStateCfg(
+            pos=(0.0, 0.0, 100.0), rot=(0.6532815, 0.2705981, 0.2705981, 0.6532815)
+        ),
     )
 
     # camera = CameraCfg(
@@ -105,14 +106,16 @@ class MySceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/YCB",
         # spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableD.usd"),
         spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb2.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90))
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90)),
     )
 
     # extras - table
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
-        spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0))
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
     )
 
 
@@ -120,7 +123,7 @@ def main():
     """Main function."""
 
     # Load kit helper
-    sim = SimulationContext(sim_utils.SimulationCfg(dt=0.005, device="cuda:0")) # or device="cpu"
+    sim = SimulationContext(sim_utils.SimulationCfg(dt=0.005, device="cuda:0"))  # or device="cpu"
     # Set main camera
     sim.set_camera_view(eye=[5, 5, 5], target=[0.0, 0.0, 0.0])
 
@@ -151,7 +154,6 @@ def main():
     gripper_count = 0
     direction = 1
 
-
     # Simulate physics
     while simulation_app.is_running():
         # If simulation is stopped, then exit.
@@ -172,16 +174,17 @@ def main():
         gripper_count = 0
         # perform this loop at policy control freq (50 Hz)
         for _ in range(300):
-            
+
             joint_pos_target[:, 0] = joint_pos_target[:, 0] + direction * 0.01
             joint_pos_target = joint_pos_target.clamp_(
-                scene.articulations["robot"].data.soft_joint_pos_limits[..., 0], scene.articulations["robot"].data.soft_joint_pos_limits[..., 1]
+                scene.articulations["robot"].data.soft_joint_pos_limits[..., 0],
+                scene.articulations["robot"].data.soft_joint_pos_limits[..., 1],
             )
-            
+
             if gripper_count > 150:
                 joint_pos_target[:, 6] = 0.04
                 # joint_pos_target[:, 7] = -0.04
-            else: 
+            else:
                 joint_pos_target[:, 6] = 0
                 # joint_pos_target[:, 7] = 0
 
@@ -194,30 +197,26 @@ def main():
             # read data from sim
             scene.update(sim_dt)
 
-
             # print information from the sensors
             # print("-------------------------------")
             # print(scene["camera"])
             # print("Received shape of rgb   image: ", scene["camera"].data.output["rgb"].shape)
             # print("Received shape of depth image: ", scene["camera"].data.output["distance_to_image_plane"].shape)
 
-
             # if count==1000, reset the scene
-            count +=1
-            gripper_count +=1
-            if count==1000:
+            count += 1
+            gripper_count += 1
+            if count == 1000:
                 root_state = scene.articulations["robot"].data.default_root_state.clone()
                 root_state[:, :3] += scene.env_origins
                 joint_pos = scene.articulations["robot"].data.default_joint_pos
                 joint_vel = scene.articulations["robot"].data.default_joint_vel
 
-                
                 # -- set root state
                 # -- robot 1
                 # scene.articulations["robot"].write_root_state_to_sim(root_state)
                 scene.articulations["robot"].write_joint_state_to_sim(joint_pos, joint_vel)
                 scene.reset()
-
 
         # update sim-time
         sim_time += sim_dt * 4

@@ -3,12 +3,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from omni.isaac.lab_assets import Z1_CFG
+
+from omni.isaac.lab.assets import ArticulationCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.utils import configclass
-from omni.isaac.lab.assets import ArticulationCfg
+
 from omni.isaac.lab_tasks.manager_based.manipulation.cabinet_z1 import mdp
-from omni.isaac.lab_assets import Z1_CFG
 
 from omni.isaac.lab_tasks.manager_based.manipulation.cabinet_z1.cabinet_env_cfg import (  # isort: skip
     FRAME_MARKER_SMALL_CFG,
@@ -28,9 +30,9 @@ class Z1CabinetEnvCfg(CabinetEnvCfg):
         super().__post_init__()
 
         # Set z1 as robot
-        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot",
-                                          init_state=ArticulationCfg.InitialStateCfg(pos=(0, 0, 0.45)))
-            
+        self.scene.robot = Z1_CFG.replace(
+            prim_path="{ENV_REGEX_NS}/Robot", init_state=ArticulationCfg.InitialStateCfg(pos=(0, 0, 0.45))
+        )
 
         # Set Actions for the specific robot type (z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(

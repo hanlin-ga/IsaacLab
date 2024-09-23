@@ -38,12 +38,11 @@ import torch
 import omni.isaac.core.utils.prims as prim_utils
 from omni.isaac.core.utils.prims import create_prim
 from omni.isaac.core.utils.stage import add_reference_to_stage
-from pxr import Gf
+from pxr import Gf, UsdGeom
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from pxr import UsdGeom, Gf
 
 ##
 # Pre-defined configs
@@ -74,8 +73,8 @@ def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     env_origins[:, 1] = spacing * yy.flatten()[:num_origins] - spacing * (num_cols - 1) / 2
     env_origins[:, 2] = 0.0
     # return the origins
-    print('num_rows is :', num_rows )
-    print('num_cols is :', num_cols )
+    print("num_rows is :", num_rows)
+    print("num_cols is :", num_cols)
     return env_origins.tolist()
 
 
@@ -157,7 +156,6 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     sawyer_arm_cfg.init_state.pos = (0.0, 0.0, 1.03)
     sawyer = Articulation(cfg=sawyer_arm_cfg)
 
-
     # Origin 7 with z1 arm
     prim_utils.create_prim("/World/Origin7", "Xform", translation=origins[6])
     # -- Table
@@ -165,19 +163,22 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     cfg.func("/World/Origin7/Table", cfg, translation=(0.55, 0.0, 1.05))
 
     print("table path is: ", {ISAAC_NUCLEUS_DIR})
-    
 
     # -- cracker box
-    cracker_box_cfg = sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/Isaac/Props/YCB/Axis_Aligned/003_cracker_box.usd")
+    cracker_box_cfg = sim_utils.UsdFileCfg(
+        usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/Isaac/Props/YCB/Axis_Aligned/003_cracker_box.usd"
+    )
     cracker_box_cfg.func("/World/Origin7/crackerbox", cracker_box_cfg, translation=(0.55, 0.0, 1.10))
 
-    cracker_box_cfg = sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/Isaac/Props/YCB/Axis_Aligned/002_master_chef_can.usd")
+    cracker_box_cfg = sim_utils.UsdFileCfg(
+        usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/Isaac/Props/YCB/Axis_Aligned/002_master_chef_can.usd"
+    )
     cracker_box_cfg.func("/World/Origin7/masterchefcan", cracker_box_cfg, translation=(0.55, 0.0, 1.20))
 
-
-    cracker_box_cfg = sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/ycb_result/013_apple/013_apple.usd", scale=(100.0, 100.0, 100.0))
+    cracker_box_cfg = sim_utils.UsdFileCfg(
+        usd_path=f"/home/hanlin/ycb_result/013_apple/013_apple.usd", scale=(100.0, 100.0, 100.0)
+    )
     cracker_box_cfg.func("/World/Origin7/apple", cracker_box_cfg, translation=(0.55, 0.0, 1.40))
-
 
     # -- Robot
     z1_cfg = Z1_CFG.replace(prim_path="/World/Origin7/Robot")
@@ -192,7 +193,7 @@ def design_scene() -> tuple[dict, list[list[float]]]:
         "kinova_j2n6s300": kinova_j2n6s300,
         "kinova_gen3n7": kinova_gen3n7,
         "sawyer": sawyer,
-        "z1": z1
+        "z1": z1,
     }
     return scene_entities, origins
 

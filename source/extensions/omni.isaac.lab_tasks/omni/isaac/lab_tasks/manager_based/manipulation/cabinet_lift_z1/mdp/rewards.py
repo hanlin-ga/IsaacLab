@@ -8,11 +8,10 @@ from __future__ import annotations
 import torch
 from typing import TYPE_CHECKING
 
+from omni.isaac.lab.assets import Articulation, AssetBase, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
-from omni.isaac.lab.utils.math import matrix_from_quat
-from omni.isaac.lab.assets import RigidObject, AssetBase, Articulation
 from omni.isaac.lab.sensors import FrameTransformer
-from omni.isaac.lab.utils.math import combine_frame_transforms
+from omni.isaac.lab.utils.math import combine_frame_transforms, matrix_from_quat
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -26,7 +25,8 @@ def second_stage_reward(env: ManagerBasedRLEnv, reward, max) -> torch.Tensor:
     # if torch.all(drawer_pos > 0.39):
     #     print("env.common_step_counter is ", env.common_step_counter)
 
-    return reward 
+    return reward
+
 
 def approach_ee_handle(env: ManagerBasedRLEnv, threshold: float) -> torch.Tensor:
     r"""Reward the robot for reaching the drawer handle using inverse-square law.
@@ -41,8 +41,8 @@ def approach_ee_handle(env: ManagerBasedRLEnv, threshold: float) -> torch.Tensor
         \end{cases}
 
     """
-    ee_tcp_pos = env.scene["ee_frame"].data.target_pos_w[..., 0, :]                  # shape is [num_envs, 3]
-    handle_pos = env.scene["cabinet_frame"].data.target_pos_w[..., 0, :]             # shape is [num_envs, 3]
+    ee_tcp_pos = env.scene["ee_frame"].data.target_pos_w[..., 0, :]  # shape is [num_envs, 3]
+    handle_pos = env.scene["cabinet_frame"].data.target_pos_w[..., 0, :]  # shape is [num_envs, 3]
 
     # Compute the distance of the end-effector to the handle
     distance = torch.norm(handle_pos - ee_tcp_pos, dim=-1, p=2)
@@ -50,7 +50,7 @@ def approach_ee_handle(env: ManagerBasedRLEnv, threshold: float) -> torch.Tensor
     # Reward the robot for reaching the handle
     reward = 1.0 / (1.0 + distance**2)
     reward = torch.pow(reward, 2)
-    final_reward = torch.where(distance <= threshold, 2 * reward, reward)                    # max 1.97
+    final_reward = torch.where(distance <= threshold, 2 * reward, reward)  # max 1.97
 
     # final_reward = second_stage_reward(env, final_reward, max=1.97)
     # print("approach_ee_handle is ", final_reward)
@@ -72,7 +72,7 @@ def align_ee_handle(env: ManagerBasedRLEnv) -> torch.Tensor:
     """
     ee_tcp_quat = env.scene["ee_frame"].data.target_quat_w[..., 0, :]
     handle_quat = env.scene["cabinet_frame"].data.target_quat_w[..., 0, :]
-    
+
     ee_tcp_rot_mat = matrix_from_quat(ee_tcp_quat)
     handle_mat = matrix_from_quat(handle_quat)
 
@@ -87,8 +87,7 @@ def align_ee_handle(env: ManagerBasedRLEnv) -> torch.Tensor:
     # dot product of z and x should be large
     align_z = torch.bmm(ee_tcp_z.unsqueeze(1), -handle_x.unsqueeze(-1)).squeeze(-1).squeeze(-1)
     align_x = torch.bmm(ee_tcp_x.unsqueeze(1), -handle_y.unsqueeze(-1)).squeeze(-1).squeeze(-1)
-    
-    
+
     final_reward = 0.5 * (torch.sign(align_z) * align_z**2 + torch.sign(align_x) * align_x**2)
     # final_reward = second_stage_reward(env, final_reward, max=0.56)
     # print("align_ee_handle is ", final_reward)
@@ -118,7 +117,7 @@ def align_grasp_around_handle(env: ManagerBasedRLEnv) -> torch.Tensor:
     return final_reward
 
 
-def approach_gripper_handle(env: ManagerBasedRLEnv,  offset: float = 0.04) -> torch.Tensor:
+def approach_gripper_handle(env: ManagerBasedRLEnv, offset: float = 0.04) -> torch.Tensor:
     """Reward the robot's gripper reaching the drawer handle with the right pose.
 
     This function returns the distance of fingertips to the handle when the fingers are in a grasping orientation
@@ -137,7 +136,6 @@ def approach_gripper_handle(env: ManagerBasedRLEnv,  offset: float = 0.04) -> to
 
     # Check if hand is in a graspable pose
     is_graspable = (rfinger_pos[:, 2] < handle_pos[:, 2]) & (lfinger_pos[:, 2] > handle_pos[:, 2])
-
 
     final_reward = is_graspable * ((offset - lfinger_dist) + (offset - rfinger_dist))
     # final_reward = second_stage_reward(env, final_reward, max=0.042)
@@ -176,14 +174,16 @@ def open_drawer_bonus(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torc
 
     The bonus is given when the drawer is open. If the grasp is around the handle, the bonus is doubled.
     """
-    drawer_pos = env.scene[asset_cfg.name].data.joint_pos[:, asset_cfg.joint_ids[0]]      # shape is tensor[num_envs];  drawer_pos[0] is 0.4; asset_cfg.name is "cabinet"; asset_cfg.joint_ids[0] is 3
-    is_graspable = align_grasp_around_handle(env).float()                                 # shape is tensor[num_envs]
+    drawer_pos = env.scene[asset_cfg.name].data.joint_pos[
+        :, asset_cfg.joint_ids[0]
+    ]  # shape is tensor[num_envs];  drawer_pos[0] is 0.4; asset_cfg.name is "cabinet"; asset_cfg.joint_ids[0] is 3
+    is_graspable = align_grasp_around_handle(env).float()  # shape is tensor[num_envs]
 
     final_reward = (is_graspable + 1.0) * drawer_pos
     # final_reward = second_stage_reward(env, final_reward, max=0.799)
     # print("open_drawer_bonus is ", final_reward)
 
-    return final_reward 
+    return final_reward
 
 
 def multi_stage_open_drawer(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -> torch.Tensor:
@@ -194,7 +194,6 @@ def multi_stage_open_drawer(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -
     """
     drawer_pos = env.scene[asset_cfg.name].data.joint_pos[:, asset_cfg.joint_ids[0]]
     is_graspable = align_grasp_around_handle(env).float()
-    
 
     open_easy = (drawer_pos > 0.01) * 0.5
     open_medium = (drawer_pos > 0.2) * is_graspable
@@ -204,10 +203,11 @@ def multi_stage_open_drawer(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg) -
     # final_reward = second_stage_reward(env, final_reward, max=2.5)
     # print("multi_stage_open_drawer is ", final_reward)
 
-    return final_reward 
+    return final_reward
 
 
 # for picking up object
+
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,
@@ -227,6 +227,7 @@ def object_ee_distance(
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
 
     return 1 - torch.tanh(object_ee_distance / std)
+
 
 def object_is_lifted(
     env: ManagerBasedRLEnv, minimal_height: float, object_cfg: SceneEntityCfg = SceneEntityCfg("object")
@@ -255,6 +256,6 @@ def object_goal_distance(
     des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
     # distance of the end-effector to the object: (num_envs,)
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
-    
+
     # rewarded if the object is lifted above the threshold
     return (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std))

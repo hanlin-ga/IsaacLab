@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+from omni.isaac.lab_assets.z1 import Z1_HIGH_PD_CFG
+
 from omni.isaac.lab.controllers.differential_ik_cfg import DifferentialIKControllerCfg
 from omni.isaac.lab.envs.mdp.actions.actions_cfg import DifferentialInverseKinematicsActionCfg
 from omni.isaac.lab.utils import configclass
@@ -13,7 +15,7 @@ from . import joint_pos_env_cfg
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_HIGH_PD_CFG  # isort: skip
-from omni.isaac.lab_assets.z1 import Z1_HIGH_PD_CFG
+
 
 @configclass
 class Z1CabinetEnvCfg(joint_pos_env_cfg.Z1CabinetEnvCfg):

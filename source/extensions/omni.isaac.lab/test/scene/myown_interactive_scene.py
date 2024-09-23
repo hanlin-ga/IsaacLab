@@ -28,11 +28,13 @@ simulation_app = app_launcher.app
 
 """Rest everything follows."""
 
+from omni.isaac.lab_assets import Z1_CFG
+
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.scene import InteractiveScene, InteractiveSceneCfg
 from omni.isaac.lab.sensors.ray_caster import RayCasterCfg, patterns
-from omni.isaac.lab.sim import SimulationContext
+from omni.isaac.lab.sim import PreviewSurfaceCfg, SimulationContext
 from omni.isaac.lab.terrains import TerrainImporterCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.timer import Timer
@@ -41,8 +43,7 @@ from omni.isaac.lab.utils.timer import Timer
 # Pre-defined configs
 ##
 from omni.isaac.lab_assets.anymal import ANYMAL_C_CFG  # isort: skip
-from omni.isaac.lab_assets import Z1_CFG
-from omni.isaac.lab.sim import PreviewSurfaceCfg
+
 
 @configclass
 class MySceneCfg(InteractiveSceneCfg):
@@ -52,7 +53,7 @@ class MySceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="plane",
-        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0))
+        visual_material=PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0)),
     )
 
     # articulation - robot 1
@@ -64,7 +65,6 @@ class MySceneCfg(InteractiveSceneCfg):
     # # articulation - robot 3
     # robot_3 = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot_3")
     # robot_3.init_state.pos = (0.0, 0.0, 0.76)
-
 
     # sensor - ray caster attached to the base of robot 1 that scans the ground
     # height_scanner = RayCasterCfg(
@@ -80,7 +80,9 @@ class MySceneCfg(InteractiveSceneCfg):
     light = AssetBaseCfg(
         prim_path="/World/light",
         spawn=sim_utils.DistantLightCfg(intensity=5000.0, color=(0.75, 0.75, 0.75)),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 100.0), rot=(0.6532815 , 0.2705981, 0.2705981, 0.6532815)),
+        init_state=AssetBaseCfg.InitialStateCfg(
+            pos=(0.0, 0.0, 100.0), rot=(0.6532815, 0.2705981, 0.2705981, 0.6532815)
+        ),
     )
 
     # extras - YCB
@@ -88,14 +90,16 @@ class MySceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/YCB",
         # spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableD.usd"),
         spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb2.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90))
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.90)),
     )
 
     # extras - table
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
-        spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0))
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-1-4.1.0/Assets/Isaac/4.0/Isaac/Environments/Office/Props/SM_TableB.usd"
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
     )
     # table3 = AssetBaseCfg(
     #     prim_path="{ENV_REGEX_NS}/Table3",
@@ -103,6 +107,7 @@ class MySceneCfg(InteractiveSceneCfg):
     #     spawn=sim_utils.UsdFileCfg(usd_path=f"/home/hanlin/Learn_isaac_sim/learn_table_ycb1.usd"),
     #     init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 16.0, 0.0))
     # )
+
 
 def main():
     """Main function."""

@@ -32,6 +32,7 @@ from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 from omni.isaac.lab_tasks.manager_based.classic.z1.z1_env_cfg import Z1EnvCfg
 
+
 def main():
     """Main function."""
     # create environment configuration
@@ -55,7 +56,7 @@ def main():
             # step the environment
             obs, rew, terminated, truncated, info = env.step(joint_efforts)
             # print current orientation of pole
-            print("[Env 0]: z1 joint: ", obs["policy"][0][8:16])   # torch.Size([:, 16]
+            print("[Env 0]: z1 joint: ", obs["policy"][0][8:16])  # torch.Size([:, 16]
             print("[Env 0]: reward is: ", rew[0])
             # update counter
             count += 1

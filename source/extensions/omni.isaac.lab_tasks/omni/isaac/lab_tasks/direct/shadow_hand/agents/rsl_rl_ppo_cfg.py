@@ -71,7 +71,7 @@ class ShadowHandAsymFFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
-class ShadowHandLSTMPPORunnerCfg(RslRlOnPolicyRunnerCfg):      # added by Hanlin
+class ShadowHandLSTMPPORunnerCfg(RslRlOnPolicyRunnerCfg):  # added by Hanlin
     num_steps_per_env = 16
     max_iterations = 10000
     save_interval = 250

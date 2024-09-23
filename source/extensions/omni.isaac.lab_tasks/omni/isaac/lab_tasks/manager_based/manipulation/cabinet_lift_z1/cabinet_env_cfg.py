@@ -8,7 +8,7 @@ from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.actuators.actuator_cfg import ImplicitActuatorCfg
-from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
+from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
@@ -20,11 +20,11 @@ from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer import OffsetCfg
-from omni.isaac.lab.utils import configclass
-from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from omni.isaac.lab.assets import RigidObjectCfg
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
+from omni.isaac.lab.utils import configclass
+from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
+
 from . import mdp
 
 ##
@@ -106,25 +106,25 @@ class CabinetSceneCfg(InteractiveSceneCfg):
         ],
     )
 
-
     # object
     object = RigidObjectCfg(
-            prim_path="{ENV_REGEX_NS}/Object",
-            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.1, 0, 0.15], rot=[0.7071068, -0.7071068, 0, 0]),   #pos=[0.55, 0, 0.78], rot=[0.7071068, -0.7071068, 0, 0]
-            spawn=UsdFileCfg(
-                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
-                rigid_props=RigidBodyPropertiesCfg(
-                    solver_position_iteration_count=16,
-                    solver_velocity_iteration_count=1,
-                    max_angular_velocity=1000.0,
-                    max_linear_velocity=1000.0,
-                    max_depenetration_velocity=5.0,
-                    disable_gravity=False,
-                ),
+        prim_path="{ENV_REGEX_NS}/Object",
+        init_state=RigidObjectCfg.InitialStateCfg(
+            pos=[0.1, 0, 0.15], rot=[0.7071068, -0.7071068, 0, 0]
+        ),  # pos=[0.55, 0, 0.78], rot=[0.7071068, -0.7071068, 0, 0]
+        spawn=UsdFileCfg(
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+            scale=(1.0, 1.0, 1.0),
+            rigid_props=RigidBodyPropertiesCfg(
+                solver_position_iteration_count=16,
+                solver_velocity_iteration_count=1,
+                max_angular_velocity=1000.0,
+                max_linear_velocity=1000.0,
+                max_depenetration_velocity=5.0,
+                disable_gravity=False,
             ),
-        )
-
+        ),
+    )
 
     # plane
     plane = AssetBaseCfg(
@@ -164,7 +164,6 @@ class CommandsCfg:
     )
 
 
-
 @configclass
 class ActionsCfg:
     """Action specifications for the MDP."""
@@ -194,14 +193,12 @@ class ObservationsCfg:
         # rel_ee_drawer_distance = ObsTerm(func=mdp.rel_ee_drawer_distance)
         # actions = ObsTerm(func=mdp.last_action)
 
-
         # This is for picking up objects
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
-
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -239,8 +236,6 @@ class EventCfg:
         },
     )
 
-    
-
     reset_robot_joints = EventTerm(
         func=mdp.reset_joints_by_offset,
         mode="reset",
@@ -261,7 +256,7 @@ class EventCfg:
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
-    )   
+    )
 
 
 @configclass
@@ -301,7 +296,6 @@ class RewardsCfg:
     # action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-1e-2)
     # joint_vel = RewTerm(func=mdp.joint_vel_l2, weight=-0.0001)
 
-
     ##################################################################################################################################
     # 5. Pick up objects
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
@@ -326,7 +320,7 @@ class RewardsCfg:
         func=mdp.joint_vel_l2,
         weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot")},
-    ) 
+    )
 
 
 @configclass
@@ -352,6 +346,8 @@ class CurriculumCfg:
     joint_vel = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
+
+
 #
 # Environment configuration
 ##

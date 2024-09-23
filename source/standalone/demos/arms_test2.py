@@ -1,3 +1,8 @@
+# Copyright (c) 2022-2024, The Isaac Lab Project Developers.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 import argparse
 
 from omni.isaac.lab.app import AppLauncher
@@ -15,14 +20,15 @@ simulation_app = app_launcher.app
 
 
 import numpy as np
+
+import omni.kit
+import omni.usd
 from omni.isaac.core.objects import DynamicCuboid
 from omni.isaac.core.objects.ground_plane import GroundPlane
 from omni.isaac.core.physics_context import PhysicsContext
-from pxr import UsdGeom, Gf, Sdf, Usd
-import omni.usd
 from omni.usd import get_context
-from pxr import PhysxSchema, UsdPhysics
-import omni.kit
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics
+
 import omni.isaac.lab.sim as sim_utils
 
 # PhysicsContext()
@@ -37,7 +43,6 @@ import omni.isaac.lab.sim as sim_utils
 usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_table_ycb1.usd"
 usd_context = get_context()
 usd_context.open_stage(usd_file_path)
-
 
 
 # Access the USD stage
@@ -67,7 +72,6 @@ rotation = Gf.Vec3f(0.0, 0.0, 0.0)  # Example: Rotate 45 degrees around the Y-ax
 # Apply the transformation at the default time (typically time 0)
 xform_api.SetTranslate(translation, Usd.TimeCode.Default())
 xform_api.SetRotate(rotation, UsdGeom.XformCommonAPI.RotationOrderXYZ, Usd.TimeCode.Default())
-
 
 
 # Start the simulation loop

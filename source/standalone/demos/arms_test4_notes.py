@@ -1,3 +1,8 @@
+# Copyright (c) 2022-2024, The Isaac Lab Project Developers.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 import argparse
 import time
 
@@ -19,30 +24,26 @@ import numpy as np
 import torch
 
 import omni.isaac.core.utils.prims as prim_utils
-from omni.isaac.core.utils.prims import create_prim
-from omni.isaac.core.utils.stage import add_reference_to_stage
-from pxr import Gf
-
+import omni.kit
+import omni.usd
 from omni.isaac.core.objects import DynamicCuboid
 from omni.isaac.core.objects.ground_plane import GroundPlane
 from omni.isaac.core.physics_context import PhysicsContext
-from pxr import UsdGeom, Gf, Sdf, Usd
-import omni.usd
+from omni.isaac.core.utils.prims import create_prim
+from omni.isaac.core.utils.stage import add_reference_to_stage
 from omni.usd import get_context
-import omni.kit
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from pxr import Usd, UsdGeom, Sdf, PhysxSchema, UsdPhysics, UsdShade
 
 ##
 # Pre-defined configs
 ##
 # isort: off
-from omni.isaac.lab_assets import (
-    Z1_CFG
-)
+from omni.isaac.lab_assets import Z1_CFG
+
 
 def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     """Defines the origins of the the scene."""
@@ -56,12 +57,12 @@ def define_origins(num_origins: int, spacing: float) -> list[list[float]]:
     env_origins[:, 1] = spacing * yy.flatten()[:num_origins] - spacing * (num_cols - 1) / 2
     env_origins[:, 2] = 0.0
     # return the origins
-    print('num_rows is :', num_rows )
-    print('num_cols is :', num_cols )
+    print("num_rows is :", num_rows)
+    print("num_cols is :", num_cols)
     return env_origins.tolist()
 
-def design_scene() -> tuple[dict, list[list[float]]]:
 
+def design_scene() -> tuple[dict, list[list[float]]]:
     """Designs the scene."""
     # Ground-plane
     # cfg = sim_utils.GroundPlaneCfg()
@@ -90,10 +91,9 @@ def design_scene() -> tuple[dict, list[list[float]]]:
     # z1_1 = Articulation(cfg=z1_cfg)
 
     # return the scene information
-    scene_entities = {
-        "z1": z1
-    }
+    scene_entities = {"z1": z1}
     return scene_entities, origins
+
 
 def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articulation], origins: torch.Tensor):
     """Runs the simulation loop."""
@@ -148,29 +148,26 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
 
             # if count1==1000 and remove_flag==0:
             #     remove_flag = 1
-                # stage = omni.usd.get_context().get_stage()
-                # # print("after removing prim")
-                # # time.sleep(5)
-                # usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
-                # prim_path = "/World/SecondStage"
-                # # Create a new prim in the stage to hold the reference
-                # reference_prim = stage.DefinePrim(prim_path, "Xform")
-                # # Add a reference to the additional USD file
-                # reference_prim.GetReferences().AddReference(usd_file_path)
-                # # Set the translation using UsdGeom.XformCommonAPI
-                # translation = Gf.Vec3d(1.2, 0.0, 0.485)  # Example translation vector
-                # xform_api = UsdGeom.XformCommonAPI(reference_prim)
-                # xform_api.SetTranslate(translation)
-                # print("Table 2 is reset")
-                # sim.reset()
-        
+            # stage = omni.usd.get_context().get_stage()
+            # # print("after removing prim")
+            # # time.sleep(5)
+            # usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
+            # prim_path = "/World/SecondStage"
+            # # Create a new prim in the stage to hold the reference
+            # reference_prim = stage.DefinePrim(prim_path, "Xform")
+            # # Add a reference to the additional USD file
+            # reference_prim.GetReferences().AddReference(usd_file_path)
+            # # Set the translation using UsdGeom.XformCommonAPI
+            # translation = Gf.Vec3d(1.2, 0.0, 0.485)  # Example translation vector
+            # xform_api = UsdGeom.XformCommonAPI(reference_prim)
+            # xform_api.SetTranslate(translation)
+            # print("Table 2 is reset")
+            # sim.reset()
 
             # reset counters
             count = 1
             direction = direction * (-1)
             print("reset direction!!!!!!!!!!")
-
-
 
             # sim.pause()
             # time.sleep(5)
@@ -182,7 +179,6 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
             # # Get the prim at the specified path
             # _03_cracker_box_prim = stage.GetPrimAtPath(prim_path)
             # sim.play()
-
 
             # # Ensure the prim is an Xformable (has a transform)
             # if _03_cracker_box_prim and _03_cracker_box_prim.IsA(UsdGeom.Xformable):
@@ -200,8 +196,8 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
             # new_translation = Gf.Vec3d(0, 0, 0)
             # xform_api.SetTranslate(new_translation)
         print("count1 is ", count1)
-        if count1==1000:
-            
+        if count1 == 1000:
+
             sim.reset()
             print("Table 2 is reset")
             sim.play()
@@ -219,11 +215,11 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, Articula
             robot.write_data_to_sim()
         # perform step
         sim.step()
-        
+
         # update sim-time
         sim_time += sim_dt
         count += 1
-        count1+= 1
+        count1 += 1
         # update buffers
         for robot in entities.values():
             robot.update(sim_dt)
@@ -234,14 +230,12 @@ def main():
     # Initialize the simulation context
     sim_cfg = sim_utils.SimulationCfg()
     sim = sim_utils.SimulationContext(sim_cfg)
-    
 
     # Set main camera
     sim.set_camera_view([3.5, 0.0, 3.2], [0.0, 0.0, 0.5])
     # design scene
     scene_entities, scene_origins = design_scene()
     scene_origins = torch.tensor(scene_origins, device=sim.device)
-
 
     # Access the USD stage
     stage = omni.usd.get_context().get_stage()
@@ -253,7 +247,6 @@ def main():
     # Add a reference to the additional USD file
     reference_prim.GetReferences().AddReference(usd_file_path)
 
-
     usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
     prim_path = "/World/SecondStage"
     # Create a new prim in the stage to hold the reference
@@ -264,7 +257,6 @@ def main():
     translation = Gf.Vec3d(1.2, 0.0, 0.485)  # Example translation vector
     xform_api = UsdGeom.XformCommonAPI(reference_prim)
     xform_api.SetTranslate(translation)
-
 
     # usd_file_path = "/home/hanlin/Learn_isaac_sim/learn_only_table_ycb.usd"
     # prim_path = "/World/ThirdStage"
@@ -338,7 +330,6 @@ def main():
     # rigid_body_api = UsdPhysics.RigidBodyAPI.Apply(reference_prim)
     # collision_api = UsdPhysics.CollisionAPI.Apply(reference_prim)
 
-    
     # # Set the transformation (translation and rotation) of the reference prim
     # xform_api = UsdGeom.XformCommonAPI(reference_prim)
 

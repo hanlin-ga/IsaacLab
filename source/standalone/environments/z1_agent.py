@@ -30,15 +30,13 @@ simulation_app = app_launcher.app
 
 """Rest everything follows."""
 
+import gymnasium as gym
 import torch
 
 from omni.isaac.lab.envs import ManagerBasedRLEnv
 
-from omni.isaac.lab_tasks.manager_based.classic.z1.z1_env_cfg import Z1EnvCfg
-import gymnasium as gym
-import torch
-
 import omni.isaac.lab_tasks  # noqa: F401
+from omni.isaac.lab_tasks.manager_based.classic.z1.z1_env_cfg import Z1EnvCfg
 from omni.isaac.lab_tasks.utils import parse_env_cfg
 
 
@@ -50,7 +48,6 @@ def main():
     )
     # create environment
     env = gym.make(args_cli.task, cfg=env_cfg)
-
 
     # simulate physics
     count = 0
@@ -69,7 +66,7 @@ def main():
             # step the environment
             obs, rew, terminated, truncated, info = env.step(joint_efforts)
             # print current orientation of pole
-            print("[Env 0]: z1 joint: ", obs["policy"][0][0:8])   # torch.Size([:, 16]
+            print("[Env 0]: z1 joint: ", obs["policy"][0][0:8])  # torch.Size([:, 16]
             print("[Env 0]: reward is: ", rew[0])
             # update counter
             count += 1

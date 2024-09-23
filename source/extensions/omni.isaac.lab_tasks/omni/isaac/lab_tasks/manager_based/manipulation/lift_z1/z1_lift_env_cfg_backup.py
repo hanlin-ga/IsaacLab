@@ -16,11 +16,11 @@ from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
+from omni.isaac.lab.sensors import CameraCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import FrameTransformerCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
-from omni.isaac.lab.sensors import CameraCfg
 
 from . import mdp
 
@@ -182,7 +182,6 @@ class RewardsCfg:
     # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
 
 
-
 @configclass
 class TerminationsCfg:
     """Termination terms for the MDP."""
@@ -214,6 +213,7 @@ class CurriculumCfg:
     #     func=mdp.modify_reward_weight, params={"term_name": "final_joint_vel", "weight": -1e-3, "num_steps": 10000}
     # )
 
+
 ##
 # Environment configuration
 ##
@@ -224,7 +224,7 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lifting environment."""
 
     # Scene settings
-    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)   # 4096
+    scene: ObjectTableSceneCfg = ObjectTableSceneCfg(num_envs=4096, env_spacing=2.5)  # 4096
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
