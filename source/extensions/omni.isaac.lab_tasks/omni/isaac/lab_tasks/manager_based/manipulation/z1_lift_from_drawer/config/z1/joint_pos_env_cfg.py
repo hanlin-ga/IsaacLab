@@ -67,7 +67,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
                 pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]
-            ),  # rot=[0.7071068, -0.7071068, 0, 0]
+            ),  
             spawn=UsdFileCfg(
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
                 usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
