@@ -7,7 +7,7 @@
 3. Ensure that the code accesses the correct user directory dynamically by using environment variables or Python's dynamic directory handling (e.g., `os.path.expanduser("~")`).
 
 4. **To pick up the cube**:
-   - Uncomment **line 76** of `joint_pos_env_cfg.py` in the following directory:
+   - Uncomment **line 73** of `joint_pos_env_cfg.py` in the following directory:
      ```bash
      ~/IsaacLab/source/extensions/omni.isaac.lab_tasks/omni/isaac/lab_tasks/manager_based/manipulation/z1_lift_from_drawer/config/z1
      ```
