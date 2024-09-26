@@ -71,6 +71,7 @@ class ShadowHandAsymFFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
 
 
 @configclass
+<<<<<<< HEAD
 class ShadowHandVisionFFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 64
     max_iterations = 50000
@@ -81,6 +82,18 @@ class ShadowHandVisionFFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         init_noise_std=1.0,
         actor_hidden_dims=[1024, 512, 512, 256, 128],
         critic_hidden_dims=[1024, 512, 512, 256, 128],
+=======
+class ShadowHandLSTMPPORunnerCfg(RslRlOnPolicyRunnerCfg):  # added by Hanlin
+    num_steps_per_env = 16
+    max_iterations = 10000
+    save_interval = 250
+    experiment_name = "shadow_hand_openai_ff"
+    empirical_normalization = True
+    policy = RslRlPpoActorCriticCfg(
+        init_noise_std=1.0,
+        actor_hidden_dims=[400, 400, 200, 100],
+        critic_hidden_dims=[512, 512, 256, 128],
+>>>>>>> 96a481fb32c9826659633f440bfea68ad26f321d
         activation="elu",
     )
     algorithm = RslRlPpoAlgorithmCfg(
@@ -88,7 +101,11 @@ class ShadowHandVisionFFPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         use_clipped_value_loss=True,
         clip_param=0.2,
         entropy_coef=0.005,
+<<<<<<< HEAD
         num_learning_epochs=5,
+=======
+        num_learning_epochs=4,
+>>>>>>> 96a481fb32c9826659633f440bfea68ad26f321d
         num_mini_batches=4,
         learning_rate=5.0e-4,
         schedule="adaptive",

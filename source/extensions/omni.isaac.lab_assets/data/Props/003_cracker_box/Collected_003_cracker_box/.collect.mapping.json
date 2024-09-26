@@ -1,0 +1,17 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/data/Props/003_cracker_box/003_cracker_box.usd",
+            "source_hash": "84d01326747b15735e14884c5ec7bb247c85250b",
+            "target_url": "./003_cracker_box.usd",
+            "target_hash": "d6e70f97a1c6a45ee7cc8e797635084367e521c1"
+        },
+        {
+            "source_url": "/home/hanlin/IsaacLab/source/extensions/omni.isaac.lab_assets/data/Props/003_cracker_box/Props/instanceable_meshes.usd",
+            "source_hash": "10a9fda9dbdb6e0006af5fc551fe03a5f37aa2d6",
+            "target_url": "./Props/instanceable_meshes.usd",
+            "target_hash": "362b0d3b47fd469cc3715804ff5d783f9696926f"
+        }
+    ]
+}

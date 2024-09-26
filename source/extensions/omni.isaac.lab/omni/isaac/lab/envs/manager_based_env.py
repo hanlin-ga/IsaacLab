@@ -85,6 +85,18 @@ class ManagerBasedEnv:
             # the type-annotation is required to avoid a type-checking error
             # since it gets confused with Isaac Sim's SimulationContext class
             self.sim: SimulationContext = SimulationContext(self.cfg.sim)
+            # multiplier = max(1, 192 // 256)
+            # n_pairs = self.sim.get_physics_context().get_gpu_found_lost_aggregate_pairs_capacity()
+            total_pairs = self.sim.get_physics_context().get_gpu_total_aggregate_pairs_capacity()
+            # print("n_pairs * multiplier is ", n_pairs * multiplier)
+            # print("n_pairs  is ", n_pairs )
+            # print("total_pairs is ", total_pairs)
+            self.sim.get_physics_context().set_gpu_total_aggregate_pairs_capacity(total_pairs * 10)
+            # new_n_pairs =self.sim.get_physics_context().get_gpu_found_lost_aggregate_pairs_capacity()
+            # new_total_pairs =self.sim.get_physics_context().get_gpu_total_aggregate_pairs_capacity()
+            # print("new_n_pairs  is ", new_n_pairs )
+            # print("new_total_pairs ", new_total_pairs)
+
         else:
             # simulation context should only be created before the environment
             # when in extension mode
