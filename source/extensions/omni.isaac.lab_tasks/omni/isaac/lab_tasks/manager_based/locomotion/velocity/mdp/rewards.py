@@ -41,6 +41,8 @@ def feet_air_time(
     reward = torch.sum((last_air_time - threshold) * first_contact, dim=1)
     # no reward for zero command
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
+    # print("first_contact is ", first_contact)  # tensor([[False,  True, False, False]]
+    # print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) # [4, 8, 14, 18]
     return reward
 
 

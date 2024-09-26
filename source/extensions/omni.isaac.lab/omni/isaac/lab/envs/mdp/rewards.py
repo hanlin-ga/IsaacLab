@@ -253,6 +253,14 @@ def undesired_contacts(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: Sce
     # check if contact force is above threshold
     net_contact_forces = contact_sensor.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+    
+    # print("net_contact_forces shape is ", net_contact_forces.shape)  # torch.Size([1, 3, 19, 3])
+    # print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) # [4, 8, 14, 18]
+    # print("all is_contact are ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0])  # tensor([[41.8019,  0.0000,  0.0000, 33.2306]])
+    # print("is_contact shape is ", is_contact.shape)   #  torch.Size([1, 4])
+    # print("is_contact is ", is_contact)  # tensor([[False, False, False, False]]
+    # print("final reward is ", torch.sum(is_contact, dim=1))  # tensor([0])
+
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)
 
