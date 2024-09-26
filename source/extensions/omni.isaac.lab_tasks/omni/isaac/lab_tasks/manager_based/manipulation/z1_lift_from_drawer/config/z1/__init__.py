@@ -17,7 +17,7 @@ from . import agents, ik_abs_env_cfg, ik_rel_env_cfg, joint_pos_env_cfg
 
 # this one is to pick up object from drawer
 gym.register(
-    id="Isaac-Lift-Cube-from-drawer-Z1-v0",
+    id="Isaac-Native-Lift-Cube-from-drawer-Z1-v0",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.Z1CubeLiftEnvCfg,
@@ -29,7 +29,7 @@ gym.register(
 )
 
 gym.register(
-    id="Isaac-Lift-Cube-from-drawer-Z1-Play-v0",
+    id="Isaac-Native-Lift-Cube-from-drawer-Z1-Play-v0",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": joint_pos_env_cfg.Z1CubeLiftEnvCfg_PLAY,
@@ -45,7 +45,7 @@ gym.register(
 ##
 
 gym.register(
-    id="Isaac-Lift-Cube-from-drawer-Z1-IK-Abs-v0",
+    id="Isaac-Native-Lift-Cube-from-drawer-Z1-IK-Abs-v0",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": ik_abs_env_cfg.Z1CubeLiftEnvCfg,
@@ -59,7 +59,7 @@ gym.register(
 ##
 
 gym.register(
-    id="Isaac-Lift-Cube-from-drawer-Z1-IK-Rel-v0",
+    id="Isaac-Native-Lift-Cube-from-drawer-Z1-IK-Rel-v0",
     entry_point="omni.isaac.lab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": ik_rel_env_cfg.Z1CubeLiftEnvCfg,
