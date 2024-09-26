@@ -222,6 +222,7 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
+    # calculate the undersired contacts penalty
     cabinet_sektion_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
