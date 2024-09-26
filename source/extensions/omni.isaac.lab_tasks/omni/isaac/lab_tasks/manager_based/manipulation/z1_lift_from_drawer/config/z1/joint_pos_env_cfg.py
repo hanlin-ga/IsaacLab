@@ -61,6 +61,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         )
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
+        
 
         # Set 006_mustard_bottleas object
         self.scene.object = RigidObjectCfg(

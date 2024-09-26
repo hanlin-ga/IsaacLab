@@ -94,3 +94,52 @@ def last_finger_rate(env: ManagerBasedRLEnv) -> torch.Tensor:
     # print("env.action_manager.action[:,7] is ", env.action_manager.action[:,7])
     return torch.abs(env.action_manager.action[:, 6] + env.action_manager.prev_action[:, 7]) < 0.02
     # return torch.sum(torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1)
+
+
+
+def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg, ID: String) -> torch.Tensor:
+    """Penalize undesired contacts as the number of violations that are above a threshold."""
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # check if contact force is above threshold
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+    is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+
+    print("ID is ", ID)
+    print("net_contact_forces shape is ", net_contact_forces.shape)
+    print("net_contact_forces[:, :, sensor_cfg.body_ids] shape is ", net_contact_forces[:, :, sensor_cfg.body_ids].shape)
+    print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1).shape)
+    print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)
+    print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) 
+    print("all is_contact are ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0]) 
+    # print("is_contact shape is ", is_contact.shape)   
+    # print("is_contact is ", is_contact)  
+    # print("final reward is ", torch.sum(is_contact, dim=1))  
+
+
+    # ID is  robot    finger_right_link
+    # net_contact_forces shape is  torch.Size([1, 3, 11, 3])
+    # net_contact_forces[:, :, sensor_cfg.body_ids] shape is  torch.Size([1, 3, 1, 3])
+    # torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is  torch.Size([1, 3, 1])
+    # torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is  torch.Size([1, 1])
+    # sensor_cfg.body_ids is  [9]
+    # all is_contact are  tensor([[21.6755]], device='cuda:0')
+    # is_contact shape is  torch.Size([1, 1])
+    # is_contact is  tensor([[True]], device='cuda:0')
+    # final reward is  tensor([1], device='cuda:0')
+
+
+    # ID is  cabinet   sektion
+    # net_contact_forces shape is  torch.Size([1, 3, 9, 3])
+    # net_contact_forces[:, :, sensor_cfg.body_ids] shape is  torch.Size([1, 3, 1, 3])
+    # torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is  torch.Size([1, 3, 1])
+    # torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] shape is  torch.Size([1, 1])
+    # sensor_cfg.body_ids is  [0]
+    # all is_contact are  tensor([[0.]], device='cuda:0')
+    # is_contact shape is  torch.Size([1, 1])
+    # is_contact is  tensor([[False]], device='cuda:0')
+    # final reward is  tensor([0], device='cuda:0')
+
+
+    # sum over contacts for each environment
+    return torch.sum(is_contact, dim=1)

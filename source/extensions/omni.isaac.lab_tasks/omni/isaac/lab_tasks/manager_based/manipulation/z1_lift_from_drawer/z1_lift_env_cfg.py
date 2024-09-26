@@ -19,6 +19,7 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
 from omni.isaac.lab.scene import InteractiveSceneCfg
 from omni.isaac.lab.sensors import CameraCfg
+from omni.isaac.lab.sensors import ContactSensorCfg, RayCasterCfg, patterns
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import FrameTransformerCfg
 from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from omni.isaac.lab.utils import configclass
@@ -61,7 +62,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             usd_path=os.path.join(
                 os.path.expanduser("~"), "Downloads/Sektion_Cabinet/sektion_cabinet_instanceable.usd"
             ),
-            activate_contact_sensors=False,
+            activate_contact_sensors=True,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
             pos=(0.85, 0, 0.4),
@@ -93,6 +94,9 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             ),
         },
     )
+
+    robot_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/z1_description/.*", history_length=3, track_air_time=True)
+    cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Cabinet/.*", history_length=3, track_air_time=True)
 
     # plane
     plane = AssetBaseCfg(
@@ -218,6 +222,19 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
+    cabinet_sektion_undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts_id,
+        weight=-1.0,
+        # params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*link01"), "threshold": 1.0},
+        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 1.0, "ID": "cabinet_sektion"},
+    )
+
+    right_finger_undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts_id,
+        weight=-1.0,
+        params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_right_link"), "threshold": 1.0, "ID": "right_finger"},
+    )
+
     # final_joint_vel = RewTerm(func=mdp.last_joint_vel, weight=-1e-4)
     # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
 
@@ -283,6 +300,11 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
+
+        self.sim.disable_contact_processing = True
+        if self.scene.cabinet_contact_forces is not None:
+            self.scene.cabinet_contact_forces.update_period = self.sim.dt
+            self.scene.robot_contact_forces.update_period = self.sim.dt
 
         self.sim.physx.bounce_threshold_velocity = 0.2
         self.sim.physx.bounce_threshold_velocity = 0.01
