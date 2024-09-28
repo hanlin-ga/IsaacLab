@@ -105,12 +105,13 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     net_contact_forces = contact_sensor.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
 
+    print("*"*50)
     print("ID is ", ID)
-    print("net_contact_forces shape is ", net_contact_forces.shape)
-    print("net_contact_forces[:, :, sensor_cfg.body_ids] shape is ", net_contact_forces[:, :, sensor_cfg.body_ids].shape)
-    print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1).shape)
-    print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)
-    print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) 
+    # print("net_contact_forces shape is ", net_contact_forces.shape)
+    # print("net_contact_forces[:, :, sensor_cfg.body_ids] shape is ", net_contact_forces[:, :, sensor_cfg.body_ids].shape)
+    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1).shape)
+    # print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)
+    # print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) 
     print("all is_contact are ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0]) 
     # print("is_contact shape is ", is_contact.shape)   
     # print("is_contact is ", is_contact)  

@@ -230,11 +230,23 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 1.0, "ID": "cabinet_sektion"},
     )
 
+    cabinet_drawer_top_undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts_id,
+        weight=-1.0,
+        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 1.0, "ID": "cabinet_drawer_top"},
+    )
     right_finger_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_right_link"), "threshold": 1.0, "ID": "right_finger"},
     )
+
+    left_finger_undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts_id,
+        weight=-1.0,
+        params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_left_link"), "threshold": 1.0, "ID": "left_finger"},
+    )
+
 
     # final_joint_vel = RewTerm(func=mdp.last_joint_vel, weight=-1e-4)
     # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
