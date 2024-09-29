@@ -108,14 +108,14 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     print("*"*50)
     print("ID is ", ID)
     # print("net_contact_forces shape is ", net_contact_forces.shape)
-    # print("net_contact_forces[:, :, sensor_cfg.body_ids] shape is ", net_contact_forces[:, :, sensor_cfg.body_ids].shape)
-    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1).shape)
+    # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])  # torch.Size([1, 3, 1, 3])   [num_envs, cfg.history_length, num_bodies, 3]  tensor([[[[-11.5659, -18.3871, -46.4664]],[[-11.7570, -18.1430, -46.7345]],[[-11.9166, -17.6637, -46.6894]]]]
+    print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))   # torch.Size([1, 3, 1])  tensor([[[51.2931],[51.4928],[51.3216]]]
     # print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)
     # print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) 
     print("all is_contact are ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0]) 
     # print("is_contact shape is ", is_contact.shape)   
     # print("is_contact is ", is_contact)  
-    # print("final reward is ", torch.sum(is_contact, dim=1))  
+    print("final reward is ", torch.sum(is_contact, dim=1))  
 
 
     # ID is  robot    finger_right_link

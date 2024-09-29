@@ -233,19 +233,44 @@ class RewardsCfg:
     cabinet_drawer_top_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 1.0, "ID": "cabinet_drawer_top"},
+        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 50.0, "ID": "cabinet_drawer_top"},
     )
-    right_finger_undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts_id,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_right_link"), "threshold": 1.0, "ID": "right_finger"},
-    )
+    # right_finger_undesired_contacts = RewTerm(
+    #     func=mdp.undesired_contacts_id,
+    #     weight=-1.0,
+    #     params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_right_link"), "threshold": 1.0, "ID": "right_finger"},
+    # )
 
-    left_finger_undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts_id,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_left_link"), "threshold": 1.0, "ID": "left_finger"},
-    )
+    # left_finger_undesired_contacts = RewTerm(
+    #     func=mdp.undesired_contacts_id,
+    #     weight=-1.0,
+    #     params={"sensor_cfg": SceneEntityCfg("robot_contact_forces", body_names="finger_left_link"), "threshold": 1.0, "ID": "left_finger"},
+    # )
+
+    # when mustard bottle is in the gripper, right finger is 51, left finger is 49. The sektion and top drawer are 0
+    # When the bottle is in the drawer, cabinet drawer top is 3.23. The other three are all zero
+    # At the point of grasping, the cabinet drawer top is 16.88, the left finger is 19.3, the right finger is 0. 
+
+    # When the mustard bottle is in the gripper: 
+    # left finger: [12.0281,  4.6416, 46.5609]     [48.3138]
+    # right finger: [-19.5480,  -3.3597, -47.4498]   [51.4286]
+
+    # when the gripper is going to grasp the bottle@
+    # The history data of the drawer top is: 
+    # tensor([[[[ 0.0000e+00,  0.0000e+00,  0.0000e+00]],[[-7.8370e-05, -1.5814e-07, -7.9145e+00]],[[ 0.0000e+00,  0.0000e+00,  0.0000e+00]]]
+    # The norm of this history data is tensor([[[0.0000],[7.9145],[0.0000]]]. The maximum is 7.91
+
+    # when the two fingers are closed without object inside
+    # left finger: 27.68
+    # right finger: 27.68
+
+    # when the robot arm is on the cabinet drawer top:
+    # The cabinet drawer top: more than 100, sometimes more than 300
+    # Left finger and right finger difference is quite big: for example, right finger force: 120. Left finger: 0
+
+    # if the object is on the top drawer
+    # top drawer:  3.28
+
 
 
     # final_joint_vel = RewTerm(func=mdp.last_joint_vel, weight=-1e-4)
