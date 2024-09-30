@@ -106,18 +106,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    # camera = CameraCfg(
-    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-    #     update_period=0.0333,
-    #     height=360,
-    #     width=640,
-    #     data_types=["rgb"],
-    #     # data_types=["rgb", "distance_to_image_plane"],
-    #     spawn=sim_utils.PinholeCameraCfg(
-    #         focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-    #     ),
-    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    # )
+    camera = CameraCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+        update_period=0.0333,
+        height=360,
+        width=640,
+        data_types=["rgb"],
+        # data_types=["rgb", "distance_to_image_plane"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+        ),
+        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    )
 
     # lights
     light = AssetBaseCfg(
@@ -139,7 +139,7 @@ class CommandsCfg:
         asset_name="robot",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
-        debug_vis=True,
+        debug_vis=False,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.3, 0.4), pos_y=(-0.25, 0.25), pos_z=(0.4, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
