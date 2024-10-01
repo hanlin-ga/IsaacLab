@@ -39,8 +39,8 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 pos=(0, 0, 0.65),
                 joint_pos={
                     "joint1": 0.0,
-                    "joint2": 1.2,
-                    "joint3": -1.6,
+                    "joint2": 1.2,   # 1.2
+                    "joint3": -1.6,  # -1.6
                     "joint4": 0.0,
                     "joint5": 0.0,
                     "joint6": 0.0,
@@ -71,6 +71,14 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             ),
             spawn=UsdFileCfg(
                 usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/011_banana.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/008_pudding_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/035_power_drill.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
+                
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(

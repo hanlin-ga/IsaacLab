@@ -91,7 +91,7 @@ class ManagerBasedEnv:
             # print("n_pairs * multiplier is ", n_pairs * multiplier)
             # print("n_pairs  is ", n_pairs )
             # print("total_pairs is ", total_pairs)
-            self.sim.get_physics_context().set_gpu_total_aggregate_pairs_capacity(total_pairs * 10)
+            self.sim.get_physics_context().set_gpu_total_aggregate_pairs_capacity(total_pairs * 30)
             # new_n_pairs =self.sim.get_physics_context().get_gpu_found_lost_aggregate_pairs_capacity()
             # new_total_pairs =self.sim.get_physics_context().get_gpu_total_aggregate_pairs_capacity()
             # print("new_n_pairs  is ", new_n_pairs )

@@ -65,7 +65,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             activate_contact_sensors=True,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
-            pos=(0.85, 0, 0.4),
+            pos=(0.82, 0, 0.4),
             rot=(0.0, 0.0, 0.0, 1.0),
             joint_pos={
                 "door_left_joint": 0.0,
@@ -106,18 +106,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    # camera = CameraCfg(
-    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-    #     update_period=0.0333,
-    #     height=360,
-    #     width=640,
-    #     data_types=["rgb"],
-    #     # data_types=["rgb", "distance_to_image_plane"],
-    #     spawn=sim_utils.PinholeCameraCfg(
-    #         focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-    #     ),
-    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    # )
+    camera = CameraCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+        update_period=0.0333,
+        height=360,
+        width=640,
+        data_types=["rgb"],
+        # data_types=["rgb", "distance_to_image_plane"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+        ),
+        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    )
 
     # lights
     light = AssetBaseCfg(

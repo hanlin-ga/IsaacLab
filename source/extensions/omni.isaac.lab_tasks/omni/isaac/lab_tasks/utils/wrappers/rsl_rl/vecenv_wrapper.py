@@ -185,6 +185,8 @@ class RslRlVecEnvWrapper(VecEnv):
         if not self.unwrapped.cfg.is_finite_horizon:
             extras["time_outs"] = truncated
 
+        images = self.env.render("rgb_array")
+        print("images : ", images.shape)
         # return the step information
         return obs, rew, dones, extras
 

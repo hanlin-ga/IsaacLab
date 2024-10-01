@@ -251,18 +251,27 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             # create the annotator if it does not exist
             if not hasattr(self, "_rgb_annotator"):
                 import omni.replicator.core as rep
-
+                
                 # create render product
-                self._render_product = rep.create.render_product(
-                    self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
-                )
-                # create rgb annotator -- used to read data from the render product
-                self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
-                self._rgb_annotator.attach([self._render_product])
+                # self._render_product = rep.create.render_product(
+                #     self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
+                # )
+                # self._render_product = rep.create.render_product(
+                #     "/World/envs/env_0/Robot/z1_description/wrist_cam_link/camera", (640, 360)
+                # )
+                for e in range(self.num_envs):
+                    self._render_product = rep.create.render_product(
+                                            f"/World/envs/env_{e}/Robot/z1_description/wrist_cam_link/camera",
+                                            self.cfg.viewer.resolution,
+                                        )
+                    # create rgb annotator -- used to read data from the render product
+                    self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                    self._rgb_annotator.attach([self._render_product])
             # obtain the rgb data
             rgb_data = self._rgb_annotator.get_data()
             # convert to numpy array
             rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(*rgb_data.shape)
+            print("rgb_data : ", rgb_data.shape)
             # return the rgb data
             # note: initially the renerer is warming up and returns empty data
             if rgb_data.size == 0:
@@ -274,6 +283,79 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
                 f"Render mode '{self.render_mode}' is not supported. Please use: {self.metadata['render_modes']}."
             )
 
+    def render_all_cameras(self, recompute: bool = False) -> np.ndarray | None:
+        """Run rendering without stepping through the physics.
+
+        By convention, if mode is:
+
+        - **human**: Render to the current display and return nothing. Usually for human consumption.
+        - **rgb_array**: Return an numpy.ndarray with shape (x, y, 3), representing RGB values for an
+          x-by-y pixel image, suitable for turning into a video.
+
+        Args:
+            recompute: Whether to force a render even if the simulator has already rendered the scene.
+                Defaults to False.
+
+        Returns:
+            The rendered image as a numpy array if mode is "rgb_array". Otherwise, returns None.
+
+        Raises:
+            RuntimeError: If mode is set to "rgb_data" and simulation render mode does not support it.
+                In this case, the simulation render mode must be set to ``RenderMode.PARTIAL_RENDERING``
+                or ``RenderMode.FULL_RENDERING``.
+            NotImplementedError: If an unsupported rendering mode is specified.
+        """
+        # run a rendering step of the simulator
+        # if we have rtx sensors, we do not need to render again sin
+        if not self.sim.has_rtx_sensors() and not recompute:
+            self.sim.render()
+        # decide the rendering mode
+        if self.render_mode == "human" or self.render_mode is None:
+            return None
+        elif self.render_mode == "rgb_array":
+            # check that if any render could have happened
+            if self.sim.render_mode.value < self.sim.RenderMode.PARTIAL_RENDERING.value:
+                raise RuntimeError(
+                    f"Cannot render '{self.render_mode}' when the simulation render mode is"
+                    f" '{self.sim.render_mode.name}'. Please set the simulation render mode to:"
+                    f"'{self.sim.RenderMode.PARTIAL_RENDERING.name}' or '{self.sim.RenderMode.FULL_RENDERING.name}'."
+                    " If running headless, make sure --enable_cameras is set."
+                )
+            # create the annotator if it does not exist
+            if not hasattr(self, "_rgb_annotator"):
+                import omni.replicator.core as rep
+                
+                # create render product
+                # self._render_product = rep.create.render_product(
+                #     self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
+                # )
+                # self._render_product = rep.create.render_product(
+                #     "/World/envs/env_0/Robot/z1_description/wrist_cam_link/camera", (640, 360)
+                # )
+                for e in range(self.num_envs):
+                    self._render_product = rep.create.render_product(
+                                            f"/World/envs/env_{e}/Robot/z1_description/wrist_cam_link/camera",
+                                            self.cfg.viewer.resolution,
+                                        )
+                    # create rgb annotator -- used to read data from the render product
+                    self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                    self._rgb_annotator.attach([self._render_product])
+            # obtain the rgb data
+            rgb_data = self._rgb_annotator.get_data()
+            # convert to numpy array
+            rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(*rgb_data.shape)
+            print("rgb_data : ", rgb_data.shape)
+            # return the rgb data
+            # note: initially the renerer is warming up and returns empty data
+            if rgb_data.size == 0:
+                return np.zeros((self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3), dtype=np.uint8)
+            else:
+                return rgb_data[:, :, :3]
+        else:
+            raise NotImplementedError(
+                f"Render mode '{self.render_mode}' is not supported. Please use: {self.metadata['render_modes']}."
+            )
+           
     def close(self):
         if not self._is_closed:
             # destructor is order-sensitive
