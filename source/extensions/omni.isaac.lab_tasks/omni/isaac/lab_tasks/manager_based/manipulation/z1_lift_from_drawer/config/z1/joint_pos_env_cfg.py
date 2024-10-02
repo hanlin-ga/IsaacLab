@@ -93,21 +93,39 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         )
 
         # Listens to the required transforms
+        cam_marker_cfg = FRAME_MARKER_CFG.copy()
+        cam_marker_cfg.markers["frame"].scale = (0.03, 0.03, 0.03)
+        cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
+        self.scene.wrist_cam_frame = FrameTransformerCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
+            debug_vis=True,
+            visualizer_cfg=cam_marker_cfg,
+            target_frames=[
+                FrameTransformerCfg.FrameCfg(
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link",
+                    name="wrist_cam",
+                    offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
+                ),
+            ],
+        )
+        # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
-        marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
-        marker_cfg.prim_path = "/Visuals/FrameTransformer"
+        marker_cfg.markers["frame"].scale = (0.03, 0.03, 0.03)
+        marker_cfg.prim_path = "/Visuals/FrameTransformer/end_effector"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
-            debug_vis=False,
+            debug_vis=True,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="end_effector",
-                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[0, 1, 0, 0]),
+                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[1, 0, 0, 0]),
                 ),
             ],
         )
+
+
 
 
 @configclass

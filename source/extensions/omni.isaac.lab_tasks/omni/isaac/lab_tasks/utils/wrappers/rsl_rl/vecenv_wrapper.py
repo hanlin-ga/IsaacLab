@@ -23,6 +23,8 @@ from rsl_rl.env import VecEnv
 
 from omni.isaac.lab.envs import DirectRLEnv, ManagerBasedRLEnv
 
+from omni.isaac.lab.managers import SceneEntityCfg
+from omni.isaac.lab.sensors import FrameTransformer
 
 class RslRlVecEnvWrapper(VecEnv):
     """Wraps around Isaac Lab environment for RSL-RL library
@@ -185,10 +187,23 @@ class RslRlVecEnvWrapper(VecEnv):
         if not self.unwrapped.cfg.is_finite_horizon:
             extras["time_outs"] = truncated
 
-        images = self.env.render("rgb_array")
+        images = self.env.render_all_cameras("rgb_array")
         print("images : ", images.shape)
+        ee_pos_source, ee_quat_source = self.obtain_cam_pos()
+        print("ee_pos_source : ", ee_pos_source[0, :])
+        print("ee_quat_source : ", ee_quat_source[0, :])
+
         # return the step information
         return obs, rew, dones, extras
 
     def close(self):  # noqa: D102
         return self.env.close()
+    
+    def obtain_cam_pos(self, ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("wrist_cam_frame"),):            # wrist_cam_link
+        wrist_cam_frame: FrameTransformer = self.env.scene[ee_frame_cfg.name]
+        # ee_pos_w = wrist_cam_frame.data.target_pos_w[..., 0, :]
+        # ee_quat_w = wrist_cam_frame.data.target_quat_w[..., 0, :]
+
+        ee_pos_source = wrist_cam_frame.data.target_pos_source[..., 0, :]   # this is the position of wrist_cam_frame relative to link00
+        ee_quat_source = wrist_cam_frame.data.target_quat_source[..., 0, :]
+        return ee_pos_source, ee_quat_source

@@ -251,27 +251,18 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             # create the annotator if it does not exist
             if not hasattr(self, "_rgb_annotator"):
                 import omni.replicator.core as rep
-                
+
                 # create render product
-                # self._render_product = rep.create.render_product(
-                #     self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
-                # )
-                # self._render_product = rep.create.render_product(
-                #     "/World/envs/env_0/Robot/z1_description/wrist_cam_link/camera", (640, 360)
-                # )
-                for e in range(self.num_envs):
-                    self._render_product = rep.create.render_product(
-                                            f"/World/envs/env_{e}/Robot/z1_description/wrist_cam_link/camera",
-                                            self.cfg.viewer.resolution,
-                                        )
-                    # create rgb annotator -- used to read data from the render product
-                    self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
-                    self._rgb_annotator.attach([self._render_product])
+                self._render_product = rep.create.render_product(
+                    self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
+                )
+                # create rgb annotator -- used to read data from the render product
+                self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                self._rgb_annotator.attach([self._render_product])
             # obtain the rgb data
             rgb_data = self._rgb_annotator.get_data()
             # convert to numpy array
             rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(*rgb_data.shape)
-            print("rgb_data : ", rgb_data.shape)
             # return the rgb data
             # note: initially the renerer is warming up and returns empty data
             if rgb_data.size == 0:
@@ -324,33 +315,51 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             # create the annotator if it does not exist
             if not hasattr(self, "_rgb_annotator"):
                 import omni.replicator.core as rep
+
+                self._render_products = []
+                self._rgb_annotators = []
                 
-                # create render product
-                # self._render_product = rep.create.render_product(
-                #     self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
-                # )
-                # self._render_product = rep.create.render_product(
-                #     "/World/envs/env_0/Robot/z1_description/wrist_cam_link/camera", (640, 360)
-                # )
+                # Loop through each environment and create a render product and annotator
                 for e in range(self.num_envs):
-                    self._render_product = rep.create.render_product(
-                                            f"/World/envs/env_{e}/Robot/z1_description/wrist_cam_link/camera",
-                                            self.cfg.viewer.resolution,
-                                        )
-                    # create rgb annotator -- used to read data from the render product
-                    self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
-                    self._rgb_annotator.attach([self._render_product])
-            # obtain the rgb data
-            rgb_data = self._rgb_annotator.get_data()
-            # convert to numpy array
-            rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(*rgb_data.shape)
-            print("rgb_data : ", rgb_data.shape)
-            # return the rgb data
-            # note: initially the renerer is warming up and returns empty data
-            if rgb_data.size == 0:
-                return np.zeros((self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3), dtype=np.uint8)
-            else:
-                return rgb_data[:, :, :3]
+                    render_product = rep.create.render_product(
+                        f"/World/envs/env_{e}/Robot/z1_description/wrist_cam_link/camera",
+                        self.cfg.viewer.resolution,
+                    )
+                    self._render_products.append(render_product)
+
+                    # Create RGB annotator for each environment and attach the render product
+                    rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                    rgb_annotator.attach([render_product])
+                    self._rgb_annotators.append(rgb_annotator)
+
+
+            rgb_data_list = []
+
+            for e in range(self.num_envs):
+                # Obtain the rgb data for the current environment
+                rgb_data = self._rgb_annotators[e].get_data()
+
+                # Check if the rgb_data buffer is empty
+                if rgb_data is None or len(rgb_data) == 0:
+                    # If no data, return a blank image
+                    rgb_data_list.append(
+                        np.zeros((self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3), dtype=np.uint8)
+                    )
+                    print(f"Warning: No data for environment {e}. Returning a blank image.")
+                else:
+                    # Convert the buffer to a numpy array and reshape
+                    rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(
+                        (self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 4)  # Assuming RGBA output
+                    )
+                    # Extract RGB channels (ignore alpha)
+                    rgb_data_list.append(rgb_data[:, :, :3])
+
+            rgb_data_batch = np.stack(rgb_data_list, axis=0)
+
+            # The shape of rgb_data_batch will be (num_envs, height, width, 3)
+            print("rgb_data_batch shape:", rgb_data_batch.shape)
+            print("Numer 3 camera rgb_data is :", rgb_data_batch[3,:,:,:])
+            return rgb_data_batch
         else:
             raise NotImplementedError(
                 f"Render mode '{self.render_mode}' is not supported. Please use: {self.metadata['render_modes']}."

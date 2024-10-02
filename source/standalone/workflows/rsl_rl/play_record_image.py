@@ -114,6 +114,8 @@ def main():
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
+
+
     # simulate environment
     while simulation_app.is_running():
         # run everything in inference mode
@@ -122,6 +124,7 @@ def main():
             actions = policy(obs)
             # env stepping
             obs, _, _, _ = env.step(actions)
+
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
