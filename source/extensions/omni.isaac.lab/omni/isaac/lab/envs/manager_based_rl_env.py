@@ -357,8 +357,8 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             rgb_data_batch = np.stack(rgb_data_list, axis=0)
 
             # The shape of rgb_data_batch will be (num_envs, height, width, 3)
-            print("rgb_data_batch shape:", rgb_data_batch.shape)
-            print("Number 0 camera rgb_data is :", rgb_data_batch[0,:,:,:])
+            # print("rgb_data_batch shape:", rgb_data_batch.shape)
+            # print("Number 0 camera rgb_data is :", rgb_data_batch[0,:,:,:])
             return rgb_data_batch
         else:
             raise NotImplementedError(

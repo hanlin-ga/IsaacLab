@@ -39,8 +39,8 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 pos=(0, 0, 0.65),
                 joint_pos={
                     "joint1": 0.0,
-                    "joint2": 1.2,   # 1.2
-                    "joint3": -1.6,  # -1.6
+                    "joint2": 0.8,   # 1.2  0.8
+                    "joint3": -0.7,  # -1.6  -0.7
                     "joint4": 0.0,
                     "joint5": 0.0,
                     "joint6": 0.0,
@@ -94,7 +94,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
 
         # Listens to the required transforms
         cam_marker_cfg = FRAME_MARKER_CFG.copy()
-        cam_marker_cfg.markers["frame"].scale = (0.03, 0.03, 0.03)
+        cam_marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
         cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
         self.scene.wrist_cam_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
@@ -110,7 +110,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         )
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
-        marker_cfg.markers["frame"].scale = (0.03, 0.03, 0.03)
+        marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
         marker_cfg.prim_path = "/Visuals/FrameTransformer/end_effector"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",

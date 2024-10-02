@@ -187,11 +187,11 @@ class RslRlVecEnvWrapper(VecEnv):
         if not self.unwrapped.cfg.is_finite_horizon:
             extras["time_outs"] = truncated
 
-        images = self.env.render_all_cameras("rgb_array")
-        print("images : ", images.shape)
-        ee_pos_source, ee_quat_source = self.obtain_cam_pos()
-        print("ee_pos_source : ", ee_pos_source[0, :])
-        print("ee_quat_source : ", ee_quat_source[0, :])
+        # images = self.env.render_all_cameras("rgb_array")
+        # print("images : ", images.shape)
+        # ee_pos_source, ee_quat_source = self.obtain_cam_pos()
+        # print("ee_pos_source : ", ee_pos_source[0, :])
+        # print("ee_quat_source : ", ee_quat_source[0, :])
 
         # return the step information
         return obs, rew, dones, extras

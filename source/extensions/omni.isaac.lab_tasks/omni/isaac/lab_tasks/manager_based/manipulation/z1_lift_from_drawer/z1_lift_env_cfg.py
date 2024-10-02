@@ -108,18 +108,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    camera = CameraCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-        update_period=0.0333,
-        height=720,
-        width=1280,
-        data_types=["rgb"],
-        # data_types=["rgb", "distance_to_image_plane"],
-        spawn=sim_utils.PinholeCameraCfg(
-            focal_length=1, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-        ),
-        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    )
+    # camera = CameraCfg(
+    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+    #     update_period=0.0333,
+    #     height=720,
+    #     width=1280,
+    #     data_types=["rgb"],
+    #     # data_types=["rgb", "distance_to_image_plane"],
+    #     spawn=sim_utils.PinholeCameraCfg(
+    #         focal_length=1, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+    #     ),
+    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    # )
 
     # lights
     light = AssetBaseCfg(
@@ -141,7 +141,7 @@ class CommandsCfg:
         asset_name="robot",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
-        debug_vis=False,
+        debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
             pos_x=(0.3, 0.4), pos_y=(-0.25, 0.25), pos_z=(0.4, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
@@ -237,6 +237,12 @@ class RewardsCfg:
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 50.0, "ID": "cabinet_drawer_top"},
     )
+
+    joint_pos = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-1e-4,
+        params={"asset_cfg": SceneEntityCfg("robot")},
+    )
     # right_finger_undesired_contacts = RewTerm(
     #     func=mdp.undesired_contacts_id,
     #     weight=-1.0,
@@ -300,6 +306,10 @@ class CurriculumCfg:
 
     joint_vel = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
+    )
+
+    joint_pos = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
     )
 
     # joint_vel1 = CurrTerm(
