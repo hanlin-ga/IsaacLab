@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from omni.isaac.lab.assets import Articulation, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import ContactSensor
+from omni.isaac.lab.utils.math import combine_frame_transforms
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -29,6 +30,8 @@ MDP terminations.
 
 def time_out(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Terminate the episode when the episode length exceeds the maximum episode length."""
+    # print("env.episode_length_buf: ", env.episode_length_buf)
+    # print("env.max_episode_length: ", env.max_episode_length)
     return env.episode_length_buf >= env.max_episode_length
 
 
@@ -71,6 +74,42 @@ def root_height_below_minimum(
     asset: RigidObject = env.scene[asset_cfg.name]
     return asset.data.root_pos_w[:, 2] < minimum_height
 
+def terminate_object_goal_distance(
+    env: ManagerBasedRLEnv,
+    distance_threshold: float,
+    command_name: str,
+    robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+) -> torch.Tensor:
+    """Reward the agent for tracking the goal pose using tanh-kernel."""
+    # extract the used quantities (to enable type-hinting)
+    robot: RigidObject = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    # distance of the end-effector to the object: (num_envs,)
+    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+
+    return distance < distance_threshold
+
+def terminate_undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg, ID: String) -> torch.Tensor:
+    """Penalize undesired contacts as the number of violations that are above a threshold."""
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # check if contact force is above threshold
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+
+    # Calculate the norm of the forces for each body ID
+    norm_forces = torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1)
+
+    # Check if all historical forces for each time step and each sensor are above the threshold
+    is_contact = torch.all(norm_forces > threshold, dim=1)
+    print("is_contact: ", is_contact)
+
+    # sum over contacts for each environment
+    return torch.sum(is_contact, dim=1)
 
 """
 Joint terminations.

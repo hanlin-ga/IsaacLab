@@ -238,11 +238,13 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 50.0, "ID": "cabinet_drawer_top"},
     )
 
+     # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
     joint_pos = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot")},
-    )
+    )              
+
     # right_finger_undesired_contacts = RewTerm(
     #     func=mdp.undesired_contacts_id,
     #     weight=-1.0,
@@ -295,6 +297,15 @@ class TerminationsCfg:
         func=mdp.root_height_below_minimum, params={"minimum_height": 0.55, "asset_cfg": SceneEntityCfg("object")}
     )
 
+    # added a new threshold for the object to be considered as arrived
+    object_arrive = DoneTerm(
+        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
+    )
+
+    # terminate_sektion_undesired_contacts = RewTerm(
+    #     func=mdp.terminate_undesired_contacts_id,
+    #     params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 1.0, "ID": "cabinet_sektion"},
+    # )
 
 @configclass
 class CurriculumCfg:

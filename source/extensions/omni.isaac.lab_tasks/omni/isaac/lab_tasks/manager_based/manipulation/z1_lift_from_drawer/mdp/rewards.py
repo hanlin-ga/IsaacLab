@@ -128,7 +128,7 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # is_contact shape is  torch.Size([1, 1])
     # is_contact is  tensor([[True]], device='cuda:0')
     # final reward is  tensor([1], device='cuda:0')
-
+    
 
     # ID is  cabinet   sektion
     # net_contact_forces shape is  torch.Size([1, 3, 9, 3])
@@ -140,7 +140,6 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # is_contact shape is  torch.Size([1, 1])
     # is_contact is  tensor([[False]], device='cuda:0')
     # final reward is  tensor([0], device='cuda:0')
-
 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)

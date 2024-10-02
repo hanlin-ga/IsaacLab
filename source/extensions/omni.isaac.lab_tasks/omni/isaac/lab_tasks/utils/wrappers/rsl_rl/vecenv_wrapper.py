@@ -177,6 +177,8 @@ class RslRlVecEnvWrapper(VecEnv):
     def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
+        # print("terminated : ", terminated)
+        # print("truncated : ", truncated)  
         # compute dones for compatibility with RSL-RL
         dones = (terminated | truncated).to(dtype=torch.long)
         # move extra observations to the extras dict
