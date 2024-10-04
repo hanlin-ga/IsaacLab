@@ -54,13 +54,9 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # Table
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
-        init_state=AssetBaseCfg.InitialStateCfg(pos=[-0.88, 0, 0.6], rot=[0.7071068, 0, 0, -0.7071068]),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=[-0.08, -0.85, 0.8], rot=[0.7071068, 0, 0, -0.7071068]),
         spawn=sim_utils.UsdFileCfg(
             usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd",
-            # usd_path=os.path.join(
-            #     os.path.expanduser("~"), "Downloads/SeattleLab_Table/table.usd"
-            # ),
-            # activate_contact_sensors=True,
             ),
     )
 
