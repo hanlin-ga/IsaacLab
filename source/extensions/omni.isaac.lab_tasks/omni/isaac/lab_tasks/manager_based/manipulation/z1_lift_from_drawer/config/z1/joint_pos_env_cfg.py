@@ -61,7 +61,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             close_command_expr={"finger_.*": 0.0},
         )
         # Set the body name for the end effector
-        self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
+        # self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
         self.commands.disc_pose.body_name = "gripper_link" 
         
 
@@ -69,7 +69,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.2976, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]
             ),
             spawn=UsdFileCfg(
                 usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
