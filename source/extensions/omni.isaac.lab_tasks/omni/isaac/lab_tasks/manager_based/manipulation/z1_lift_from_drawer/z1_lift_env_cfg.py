@@ -52,11 +52,17 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # object: AssetBaseCfg = MISSING
 
     # Table
-    # table = AssetBaseCfg(
-    #     prim_path="{ENV_REGEX_NS}/Table",
-    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
-    #     spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
-    # )
+    table = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Table",
+        init_state=AssetBaseCfg.InitialStateCfg(pos=[-0.88, 0, 0.6], rot=[0.7071068, 0, 0, -0.7071068]),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd",
+            # usd_path=os.path.join(
+            #     os.path.expanduser("~"), "Downloads/SeattleLab_Table/table.usd"
+            # ),
+            # activate_contact_sensors=True,
+            ),
+    )
 
     cabinet = ArticulationCfg(
         prim_path="{ENV_REGEX_NS}/Cabinet",
