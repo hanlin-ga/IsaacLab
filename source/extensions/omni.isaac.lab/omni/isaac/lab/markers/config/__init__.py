@@ -67,7 +67,7 @@ DISC_MARKER_CFG = VisualizationMarkersCfg(
         "disc": sim_utils.CylinderCfg(
             radius=0.5,
             height=1.0,
-            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.0, 0.0, 1.0)),
+            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 0.0, 0.0)),
         ),
     }
 )

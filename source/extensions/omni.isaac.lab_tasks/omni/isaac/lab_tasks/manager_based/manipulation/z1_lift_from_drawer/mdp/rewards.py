@@ -68,6 +68,30 @@ def object_goal_distance(
     # rewarded if the object is lifted above the threshold
     return (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std))
 
+def object_disc_goal_distance(
+    env: ManagerBasedRLEnv,
+    std: float,
+    minimal_height: float,
+    command_name: str,
+    robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+) -> torch.Tensor:
+    """Reward the agent for tracking the goal pose using tanh-kernel."""
+    # extract the used quantities (to enable type-hinting)
+    robot: RigidObject = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    # distance of the end-effector to the object: (num_envs,)
+    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
+    # print("des_pos_w is ", des_pos_w)
+
+    # rewarded if the object is lifted above the threshold
+    return (1 - torch.tanh(distance / std))
+
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""
@@ -106,8 +130,9 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
 
     # print("*"*50)
-    # print("ID is ", ID)
-    # print("net_contact_forces shape is ", net_contact_forces.shape)
+    if ID=="table":
+        print("ID is ", ID)
+        print("net_contact_forces shape is ", net_contact_forces)
     # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])  # torch.Size([1, 3, 1, 3])   [num_envs, cfg.history_length, num_bodies, 3]  tensor([[[[-11.5659, -18.3871, -46.4664]],[[-11.7570, -18.1430, -46.7345]],[[-11.9166, -17.6637, -46.6894]]]]
     # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))   # torch.Size([1, 3, 1])  tensor([[[51.2931],[51.4928],[51.3216]]]
     # print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)

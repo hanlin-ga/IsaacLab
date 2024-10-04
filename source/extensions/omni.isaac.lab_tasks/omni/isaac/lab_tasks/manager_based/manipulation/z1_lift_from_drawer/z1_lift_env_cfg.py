@@ -45,6 +45,9 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     ee_frame: FrameTransformerCfg = MISSING
 
     wrist_cam_frame: FrameTransformerCfg = MISSING
+
+    # disc_marker: FrameTransformerCfg = MISSING
+
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
 
@@ -53,9 +56,24 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # Table
     # table = AssetBaseCfg(
     #     prim_path="{ENV_REGEX_NS}/Table",
-    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
-    #     spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[-0.88, 0, 0.6], rot=[0.7071068, 0, 0, -0.7071068]),
+    #     spawn=sim_utils.UsdFileCfg(
+    #         # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd",
+    #         usd_path=os.path.join(
+    #             os.path.expanduser("~"), "Downloads/SeattleLab_Table/table.usd"
+    #         ),
+    #         activate_contact_sensors=True,
+    #         ),
     # )
+
+
+    table = AssetBaseCfg(
+        prim_path="{ENV_REGEX_NS}/Table",
+        init_state=AssetBaseCfg.InitialStateCfg(pos=[-0.08, -0.85, 0.8], rot=[0.7071068, 0, 0, -0.7071068]),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd",
+            ),
+    )
 
     cabinet = ArticulationCfg(
         prim_path="{ENV_REGEX_NS}/Cabinet",
@@ -67,7 +85,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             activate_contact_sensors=True,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
-            pos=(0.82, 0, 0.4),
+            pos=(0.85, 0, 0.4),
             rot=(0.0, 0.0, 0.0, 1.0),
             joint_pos={
                 "door_left_joint": 0.0,
@@ -99,6 +117,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 
     robot_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/z1_description/.*", history_length=3, track_air_time=True)
     cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Cabinet/.*", history_length=3, track_air_time=True)
+    # table_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table/.*", history_length=3, track_air_time=True)
+
 
     # plane
     plane = AssetBaseCfg(
@@ -147,6 +167,16 @@ class CommandsCfg:
         ),
     )
 
+    disc_pose = mdp.UniformDiskPoseCommandCfg(
+        asset_name="robot",
+        body_name=MISSING,  # will be set by agent env cfg
+        resampling_time_range=(5.0, 5.0),
+        debug_vis=True,
+        ranges=mdp.UniformDiskPoseCommandCfg.Ranges(
+            pos_x=(-0.18, 0.18), pos_y=(-0.5, -0.5), pos_z=(0.15, 0.15), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ),
+    )
+
 
 @configclass
 class ActionsCfg:
@@ -169,6 +199,7 @@ class ObservationsCfg:
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "disc_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -201,17 +232,29 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.8}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.79}, weight=15.0)
+
+    # object_goal_tracking = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.3, "minimal_height": 0.8, "command_name": "object_pose"},
+    #     weight=16.0,
+    # )
+
+    # object_goal_tracking_fine_grained = RewTerm(
+    #     func=mdp.object_goal_distance,
+    #     params={"std": 0.05, "minimal_height": 0.8, "command_name": "object_pose"},
+    #     weight=5.0,
+    # )
 
     object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.8, "command_name": "object_pose"},
+        func=mdp.object_disc_goal_distance,
+        params={"std": 0.3, "minimal_height": 0.79, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.8, "command_name": "object_pose"},
+        func=mdp.object_disc_goal_distance,
+        params={"std": 0.05, "minimal_height": 0.79, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -237,6 +280,12 @@ class RewardsCfg:
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="drawer_top"), "threshold": 50.0, "ID": "cabinet_drawer_top"},
     )
+
+    # table_undesired_contacts = RewTerm(
+    #     func=mdp.undesired_contacts_id,
+    #     weight=-1.0,
+    #     params={"sensor_cfg": SceneEntityCfg("table_contact_forces", body_names="Table"), "threshold": 50.0, "ID": "table"},
+    # )
 
      # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
     joint_pos = RewTerm(
@@ -298,9 +347,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
-    )
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.08, "command_name": "disc_pose"}
+    # )
 
     # terminate_sektion_undesired_contacts = RewTerm(
     #     func=mdp.terminate_undesired_contacts_id,

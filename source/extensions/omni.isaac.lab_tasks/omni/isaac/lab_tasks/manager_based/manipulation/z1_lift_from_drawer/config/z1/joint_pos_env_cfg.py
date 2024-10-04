@@ -25,6 +25,7 @@ from omni.isaac.lab_tasks.manager_based.manipulation.z1_lift_from_drawer.z1_lift
 from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 from omni.isaac.lab_assets.franka import FRANKA_PANDA_CFG  # isort: skip
 
+# from omni.isaac.lab.markers.config import DISC_MARKER_CFG
 
 @configclass
 class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
@@ -61,6 +62,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         )
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
+        self.commands.disc_pose.body_name = "gripper_link" 
         
 
         # Set 006_mustard_bottleas object
@@ -92,29 +94,13 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             ),
         )
 
-        # Listens to the required transforms
-        cam_marker_cfg = FRAME_MARKER_CFG.copy()
-        cam_marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
-        cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
-        self.scene.wrist_cam_frame = FrameTransformerCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
-            debug_vis=True,
-            visualizer_cfg=cam_marker_cfg,
-            target_frames=[
-                FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link",
-                    name="wrist_cam",
-                    offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
-                ),
-            ],
-        )
-        # Listens to the required transforms
+        # Listens to the required transforms for ee_frame
         marker_cfg = FRAME_MARKER_CFG.copy()
         marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
         marker_cfg.prim_path = "/Visuals/FrameTransformer/end_effector"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
-            debug_vis=True,
+            debug_vis=False,
             visualizer_cfg=marker_cfg,
             target_frames=[
                 FrameTransformerCfg.FrameCfg(
@@ -125,7 +111,40 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             ],
         )
 
-        
+        # Listens to the required transforms for wrist_cam_frame
+        cam_marker_cfg = FRAME_MARKER_CFG.copy()
+        cam_marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
+        cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
+        self.scene.wrist_cam_frame = FrameTransformerCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
+            debug_vis=False,
+            visualizer_cfg=cam_marker_cfg,
+            target_frames=[
+                FrameTransformerCfg.FrameCfg(
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link",
+                    name="wrist_cam",
+                    offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
+                ),
+            ],
+        )
+
+        # set dis marker
+        # disc_marker_cfg = DISC_MARKER_CFG.copy()
+        # disc_marker_cfg.markers["disc"].radius = 0.5
+        # disc_marker_cfg.markers["disc"].height = 0.1
+        # disc_marker_cfg.prim_path = "/Visuals/DiscMarker"
+        # self.scene.disc_marker = FrameTransformerCfg(
+        #     prim_path="{ENV_REGEX_NS}/Object",
+        #     debug_vis=True,
+        #     visualizer_cfg=disc_marker_cfg,
+        #     target_frames=[
+        #         FrameTransformerCfg.FrameCfg(
+        #             prim_path="{ENV_REGEX_NS}/Object",
+        #             name="disc",
+        #             offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
+        #         ),
+        #     ],
+        # )
 
 
 
