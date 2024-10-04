@@ -153,7 +153,6 @@ class UniformPoseCommandCfg(CommandTermCfg):
     goal_pose_visualizer_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
     current_pose_visualizer_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
 
-
 @configclass
 class UniformDiskPoseCommandCfg(CommandTermCfg):
     """Configuration for uniform pose command generator."""
