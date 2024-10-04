@@ -11,6 +11,7 @@ from .commands_cfg import (
     TerrainBasedPose2dCommandCfg,
     UniformPose2dCommandCfg,
     UniformPoseCommandCfg,
+    UniformDiskPoseCommandCfg,
     UniformVelocityCommandCfg,
 )
 from .null_command import NullCommand
