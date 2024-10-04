@@ -44,7 +44,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                     "joint4": 0.0,
                     "joint5": 0.0,
                     "joint6": 0.0,
-                    "finger_.*": 0.04,
+                    "finger_.*": 0.0274,
                 },
             ),
         )
@@ -67,7 +67,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.2875, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.2875, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]  # this is for the default position in the gripper 
             ),
             spawn=UsdFileCfg(
                 usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
