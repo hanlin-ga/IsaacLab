@@ -297,10 +297,10 @@ class TerminationsCfg:
         func=mdp.root_height_below_minimum, params={"minimum_height": 0.55, "asset_cfg": SceneEntityCfg("object")}
     )
 
-    # # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
-    )
+    # # # added a new threshold for the object to be considered as arrived
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
+    # )
 
     # terminate_sektion_undesired_contacts = RewTerm(
     #     func=mdp.terminate_undesired_contacts_id,
