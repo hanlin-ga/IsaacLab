@@ -165,7 +165,7 @@ def joint_deviation_l1(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"))
     asset: Articulation = env.scene[asset_cfg.name]
     # compute out of limits constraints
     angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
-    # print("angle is ", asset.data.joint_pos[:, asset_cfg.joint_ids] )
+    # print("joint angles are ", asset.data.joint_pos[:, asset_cfg.joint_ids][0:6])
     # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
     return torch.sum(torch.abs(angle), dim=1)
 
