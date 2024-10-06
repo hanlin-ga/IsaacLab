@@ -67,7 +67,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
             activate_contact_sensors=True,
         ),
         init_state=ArticulationCfg.InitialStateCfg(
-            pos=(0.82, 0, 0.4),
+            pos=(0.85, 0, 0.4),
             rot=(0.0, 0.0, 0.0, 1.0),
             joint_pos={
                 "door_left_joint": 0.0,
