@@ -41,7 +41,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                     "joint1": 0.0,
                     "joint2": 0.8,   # 1.2  0.8
                     "joint3": -0.7,  # -1.6  -0.7
-                    "joint4": 0.0,
+                    "joint4": 0.3,
                     "joint5": 0.0,
                     "joint6": 0.0,
                     "finger_.*": 0.04,

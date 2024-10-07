@@ -124,9 +124,9 @@ def main():
             actions = policy(obs)
             # env stepping
             obs, _, _, _ = env.step(actions)
-            print("*"*50)
-            print("actions is ", actions[:, 0:6])
-            print("obs[0:6] is ", obs[:,0:6])
+            # print("*"*50)
+            # print("actions is ", actions[:, 0:6])
+            # print("obs[0:6] is ", obs[:,0:6])
             
         if args_cli.video:
             timestep += 1
