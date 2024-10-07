@@ -13,22 +13,43 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
+from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate, quat_error_magnitude
+
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 
-def object_is_lifted(
-    env: ManagerBasedRLEnv, minimal_height: float, object_cfg: SceneEntityCfg = SceneEntityCfg("object")
-) -> torch.Tensor:
+def object_is_lifted(env: ManagerBasedRLEnv, 
+                     minimal_height: float,
+
+                     distance_threshold: float,
+                     command_name: str,
+                     
+                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
-    return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
+
+    return torch.where(condition, 1.0, 0.0) 
 
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,
     std: float,
+
+    distance_threshold: float,
+    command_name: str,
+
+    robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
     ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
 ) -> torch.Tensor:
@@ -42,19 +63,43 @@ def object_ee_distance(
     ee_w = ee_frame.data.target_pos_w[..., 0, :]
     # Distance of the end-effector to the object: (num_envs,)
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
-    
-    # print("ee_w is ", ee_w)
 
-    return 1 - torch.tanh(object_ee_distance / std)
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = distance_xy > distance_threshold
+
+    return 1 - torch.tanh(object_ee_distance / std)*condition
+
+
+def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    
+    object: RigidObject = env.scene[object_cfg.name]
+
+    cube_quat_w = object.data.root_quat_w
+    default_quat_w = object.data.default_root_state[:, 3:7]
+    # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
+    # example_quat_w = object.data.default_root_state[:, 3:7]
+    # print("example angle diff is ", quat_error_magnitude(example_quat_w , default_quat_w))
+    return quat_error_magnitude(cube_quat_w, default_quat_w)
 
 
 def object_goal_distance(
     env: ManagerBasedRLEnv,
     std: float,
+
+    delta_z: float,
+    distance_threshold: float,
     minimal_height: float,
     command_name: str,
+
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    
 ) -> torch.Tensor:
     """Reward the agent for tracking the goal pose using tanh-kernel."""
     # extract the used quantities (to enable type-hinting)
@@ -64,12 +109,40 @@ def object_goal_distance(
     # compute the desired position in the world frame
     des_pos_b = command[:, :3]
     des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
     # distance of the end-effector to the object: (num_envs,)
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
 
     # rewarded if the object is lifted above the threshold
-    return (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std))
+    return condition * (1 - torch.tanh(distance / std))
 
+def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
+                                 distance_threshold: float,
+                                 command_name: str,
+
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+                                 robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                                 asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+
+    # set the condition
+    robot: RigidObject = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    # distance of the end-effector to the object: (num_envs,)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (distance_xy < distance_threshold)
+
+    return torch.sum(torch.abs(angle), dim=1) * condition
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""
@@ -106,42 +179,6 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # check if contact force is above threshold
     net_contact_forces = contact_sensor.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
-
-    # print("*"*50)
-    # print("ID is ", ID)
-    # print("net_contact_forces shape is ", net_contact_forces.shape)
-    # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])  # torch.Size([1, 3, 1, 3])   [num_envs, cfg.history_length, num_bodies, 3]  tensor([[[[-11.5659, -18.3871, -46.4664]],[[-11.7570, -18.1430, -46.7345]],[[-11.9166, -17.6637, -46.6894]]]]
-    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))   # torch.Size([1, 3, 1])  tensor([[[51.2931],[51.4928],[51.3216]]]
-    # print("torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0].shape)
-    # print("sensor_cfg.body_ids is ", sensor_cfg.body_ids) 
-    # print("all is_contact are ", torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0]) 
-    # print("is_contact shape is ", is_contact.shape)   
-    # print("is_contact is ", is_contact)  
-    # print("final reward is ", torch.sum(is_contact, dim=1))  
-
-
-    # ID is  robot    finger_right_link
-    # net_contact_forces shape is  torch.Size([1, 3, 11, 3])
-    # net_contact_forces[:, :, sensor_cfg.body_ids] shape is  torch.Size([1, 3, 1, 3])
-    # torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is  torch.Size([1, 3, 1])
-    # torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1) shape is  torch.Size([1, 1])
-    # sensor_cfg.body_ids is  [9]
-    # all is_contact are  tensor([[21.6755]], device='cuda:0')
-    # is_contact shape is  torch.Size([1, 1])
-    # is_contact is  tensor([[True]], device='cuda:0')
-    # final reward is  tensor([1], device='cuda:0')
-    
-
-    # ID is  cabinet   sektion
-    # net_contact_forces shape is  torch.Size([1, 3, 9, 3])
-    # net_contact_forces[:, :, sensor_cfg.body_ids] shape is  torch.Size([1, 3, 1, 3])
-    # torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is  torch.Size([1, 3, 1])
-    # torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] shape is  torch.Size([1, 1])
-    # sensor_cfg.body_ids is  [0]
-    # all is_contact are  tensor([[0.]], device='cuda:0')
-    # is_contact shape is  torch.Size([1, 1])
-    # is_contact is  tensor([[False]], device='cuda:0')
-    # final reward is  tensor([0], device='cuda:0')
 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)

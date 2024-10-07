@@ -18,6 +18,8 @@ import omni.isaac.lab.utils.math as math_utils
 from omni.isaac.lab.assets import Articulation, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import Camera, RayCaster, RayCasterCamera, TiledCamera
+from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate
+
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedEnv, ManagerBasedRLEnv
@@ -117,6 +119,31 @@ def joint_pos_rel(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityC
     asset: Articulation = env.scene[asset_cfg.name]
     # print("asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids] shape is: ", (asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]).shape)
     return asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+
+
+def object_goal_orientation_diff_obs(env: ManagerBasedRLEnv, 
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    
+    object: RigidObject = env.scene[object_cfg.name]
+
+    cube_quat_w = object.data.root_quat_w
+    default_quat_w = object.data.default_root_state[:, 3:7]
+    orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
+
+    return orientation_diff
+
+
+def object_pose_obs(env: ManagerBasedRLEnv, 
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    
+    object: RigidObject = env.scene[object_cfg.name]
+
+    cube_quat_w = object.data.root_quat_w
+    # default_quat_w = object.data.default_root_state[:, 3:7]
+    # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
+
+    return cube_quat_w
+
 
 
 def joint_pos_limit_normalized(

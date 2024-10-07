@@ -180,6 +180,8 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        # object_goal_orientation_diff_obs = ObsTerm(func=mdp.object_goal_orientation_diff_obs)
+        object_pose_obs = ObsTerm(func=mdp.object_pose_obs)
         # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "disc_pose"})
         actions = ObsTerm(func=mdp.last_action)
@@ -213,18 +215,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.79}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "distance_threshold": 0.01, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.85, "distance_threshold": 0.01, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.79, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.1, "distance_threshold": 0.01, "minimal_height": 0.85, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.79, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.1, "distance_threshold": 0.01, "minimal_height": 0.85, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -253,10 +255,12 @@ class RewardsCfg:
 
      # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
     joint_pos = RewTerm(
-        func=mdp.joint_deviation_l1,
-        weight=-1e-4,
-        params={"asset_cfg": SceneEntityCfg("robot")},
+        func=mdp.joint_deviation_l1_condition,
+        weight=-1e-1,
+        params={"distance_threshold": 0.01, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
     )              
+
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
 
     # right_finger_undesired_contacts = RewTerm(
     #     func=mdp.undesired_contacts_id,
@@ -311,9 +315,9 @@ class TerminationsCfg:
     )
 
     # # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.03, "command_name": "disc_pose"}
-    )
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.03, "command_name": "disc_pose"}
+    # )
 
     # terminate_sektion_undesired_contacts = RewTerm(
     #     func=mdp.terminate_undesired_contacts_id,
@@ -332,9 +336,9 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
 
-    joint_pos = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
-    )
+    # joint_pos = CurrTerm(
+    #     func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
+    # )
 
     # joint_vel1 = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1, "num_steps": 50000}
