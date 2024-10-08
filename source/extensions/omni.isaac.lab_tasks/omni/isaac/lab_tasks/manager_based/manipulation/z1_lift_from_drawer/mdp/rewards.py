@@ -13,7 +13,7 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
-from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate, quat_error_magnitude
+from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate, quat_error_magnitude_xy
 
 
 if TYPE_CHECKING:
@@ -84,8 +84,9 @@ def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv,
     default_quat_w = object.data.default_root_state[:, 3:7]
     # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
     # example_quat_w = object.data.default_root_state[:, 3:7]
-    # print("example angle diff is ", quat_error_magnitude(example_quat_w , default_quat_w))
-    return quat_error_magnitude(cube_quat_w, default_quat_w)
+    # print("example angle diff is ", quat_error_magnitude_xy(cube_quat_w , default_quat_w))
+    # print("orientation_diff is ", orientation_diff)
+    return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
 
 
 def object_goal_distance(
@@ -131,18 +132,22 @@ def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
     # compute out of limits constraints
     angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
 
-    # set the condition
-    robot: RigidObject = env.scene[robot_cfg.name]
-    object: RigidObject = env.scene[object_cfg.name]
-    command = env.command_manager.get_command(command_name)
-    # compute the desired position in the world frame
-    des_pos_b = command[:, :3]
-    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
-    # distance of the end-effector to the object: (num_envs,)
-    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (distance_xy < distance_threshold)
+    angle[:, 6] = 10 * angle[:, 6]
+    angle[:, 7] = 10 * angle[:, 7]
 
-    return torch.sum(torch.abs(angle), dim=1) * condition
+    # set the condition
+    # robot: RigidObject = env.scene[robot_cfg.name]
+    # object: RigidObject = env.scene[object_cfg.name]
+    # command = env.command_manager.get_command(command_name)
+    # # compute the desired position in the world frame
+    # des_pos_b = command[:, :3]
+    # des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    # # distance of the end-effector to the object: (num_envs,)
+    # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    # condition = (distance_xy < distance_threshold)
+
+    return torch.sum(torch.abs(angle), dim=1)
+
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""
