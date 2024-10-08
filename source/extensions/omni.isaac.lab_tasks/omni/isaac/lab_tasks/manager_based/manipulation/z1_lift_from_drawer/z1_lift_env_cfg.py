@@ -215,18 +215,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "distance_threshold": 0.01, "command_name": "disc_pose"}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.85, "distance_threshold": 0.01, "command_name": "disc_pose"}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.85, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "delta_z": 0.1, "distance_threshold": 0.01, "minimal_height": 0.85, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.06, "distance_threshold": 0.03, "minimal_height": 0.85, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "delta_z": 0.1, "distance_threshold": 0.01, "minimal_height": 0.85, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.06, "distance_threshold": 0.03, "minimal_height": 0.85, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -257,7 +257,7 @@ class RewardsCfg:
     joint_pos = RewTerm(
         func=mdp.joint_deviation_l1_condition,
         weight=-1e-1,
-        params={"distance_threshold": 0.01, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
+        params={"distance_threshold": 0.03, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
     )              
 
     object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
