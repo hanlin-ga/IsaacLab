@@ -256,7 +256,7 @@ class RewardsCfg:
      # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
     joint_pos = RewTerm(
         func=mdp.joint_deviation_l1_condition,
-        weight=-1e-1,
+        weight=-1,
         params={"distance_threshold": 0.03, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
     )              
 
