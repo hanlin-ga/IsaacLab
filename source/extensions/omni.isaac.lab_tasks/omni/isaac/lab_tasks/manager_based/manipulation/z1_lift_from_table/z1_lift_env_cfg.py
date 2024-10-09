@@ -62,7 +62,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         init_state=AssetBaseCfg.InitialStateCfg(pos=(0.3, 0.0, -1.0)),
     )
     
-    cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table", history_length=3, track_air_time=True)
+    table_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table", history_length=3, track_air_time=True)
 
     # plane
     plane = AssetBaseCfg(
@@ -107,7 +107,7 @@ class CommandsCfg:
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.3, 0.5), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.4), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.2976, 0.2976), pos_y=(0, 0), pos_z=(0.35, 0.35), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -153,7 +153,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+            "pose_range": {"x": (-0.2, 0.1), "y": (-0.35, 0.35), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -188,9 +188,20 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
-    # final_joint_vel = RewTerm(func=mdp.last_joint_vel, weight=-1e-4)
-    # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
+    # calculate the undersired contacts penalty
+    table_undesired_contacts = RewTerm(
+        func=mdp.undesired_contacts_id,
+        weight=-1.0,
+        # params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*link01"), "threshold": 1.0},
+        params={"sensor_cfg": SceneEntityCfg("table_contact_forces", body_names="Table"), "threshold": 100, "ID": "table_top"},
+    )
 
+     # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
+    joint_pos = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-1e-4,
+        params={"asset_cfg": SceneEntityCfg("robot")},
+    )       
 
 @configclass
 class TerminationsCfg:
@@ -198,9 +209,9 @@ class TerminationsCfg:
 
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
-    # object_dropping = DoneTerm(
-    #     func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
-    # )
+    object_dropping = DoneTerm(
+        func=mdp.root_height_below_minimum, params={"minimum_height": -0.2, "asset_cfg": SceneEntityCfg("object")}
+    )
 
 
 @configclass

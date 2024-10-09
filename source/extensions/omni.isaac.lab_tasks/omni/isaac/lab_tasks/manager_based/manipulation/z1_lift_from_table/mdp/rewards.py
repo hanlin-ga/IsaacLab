@@ -88,6 +88,16 @@ def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> 
     return torch.abs(asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5])
 
 
+def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg, ID: String) -> torch.Tensor:
+    """Penalize undesired contacts as the number of violations that are above a threshold."""
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # check if contact force is above threshold
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+    is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+    # print("net_contact_forces is ", net_contact_forces)
+    return torch.sum(is_contact, dim=1)
+
 def last_finger_rate(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Penalize the rate of change of the actions using L2 squared kernel."""
     # print("env.action_manager.action[:,6] is ", env.action_manager.action[:,6])
