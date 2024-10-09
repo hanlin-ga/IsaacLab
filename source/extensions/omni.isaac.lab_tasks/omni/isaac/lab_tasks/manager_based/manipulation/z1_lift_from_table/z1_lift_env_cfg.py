@@ -2,13 +2,11 @@
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-import os 
 
 from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
-from omni.isaac.lab.sensors import ContactSensorCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
@@ -42,8 +40,6 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = MISSING
     # end-effector sensor: will be populated by agent env cfg
     ee_frame: FrameTransformerCfg = MISSING
-
-    wrist_cam_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
 
@@ -54,20 +50,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/Table",
         init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
         spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
-        
     )
-    # table = AssetBaseCfg(
-    #     prim_path="{ENV_REGEX_NS}/Table",
-    #     spawn=sim_utils.UsdFileCfg(
-    #         # usd_path=f"/home/hanlin/Downloads/Table/OakTableSmall.usd",
-    #         usd_path=os.path.join(os.path.expanduser("~"), "Downloads/Table/OakTableSmall.usd"),
-    #         scale=(0.01, 0.02, 0.01),
-    #         activate_contact_sensors=True,
-    #     ),
-    #     init_state=AssetBaseCfg.InitialStateCfg(pos=(0.3, 0.0, -1.0)),
-    # )
-    
-    # table_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table", history_length=3, track_air_time=True)
 
     # plane
     plane = AssetBaseCfg(
@@ -112,7 +95,7 @@ class CommandsCfg:
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.5), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.3, 0.5), pos_y=(-0.25, 0.25), pos_z=(0.25, 0.4), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -170,17 +153,17 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.04}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.15}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.3, "minimal_height": 0.04, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.15, "command_name": "object_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance,
-        params={"std": 0.05, "minimal_height": 0.04, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.15, "command_name": "object_pose"},
         weight=5.0,
     )
 
@@ -193,20 +176,9 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
-    # calculate the undersired contacts penalty
-    # table_undesired_contacts = RewTerm(
-    #     func=mdp.undesired_contacts_id,
-    #     weight=-1.0,
-    #     # params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*link01"), "threshold": 1.0},
-    #     params={"sensor_cfg": SceneEntityCfg("table_contact_forces", body_names="Table"), "threshold": 50, "ID": "table_top"},
-    # )
+    # final_joint_vel = RewTerm(func=mdp.last_joint_vel, weight=-1e-4)
+    # last_two_finger = RewTerm(func=mdp.last_finger_rate, weight=1)
 
-     # encourage the robot to move less relative to the default joint position, and I changed the joint limits of the usd files as well
-    # joint_pos = RewTerm(
-    #     func=mdp.joint_deviation_l1,
-    #     weight=-1e-4,
-    #     params={"asset_cfg": SceneEntityCfg("robot")},
-    # )       
 
 @configclass
 class TerminationsCfg:
@@ -215,7 +187,7 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
     object_dropping = DoneTerm(
-        func=mdp.root_height_below_minimum, params={"minimum_height": -0.2, "asset_cfg": SceneEntityCfg("object")}
+        func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
     )
 
 
@@ -269,10 +241,6 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
-
-        # self.sim.disable_contact_processing = True
-        # if self.scene.table_contact_forces is not None:
-        #     self.scene.table_contact_forces.update_period = self.sim.dt
 
         self.sim.physx.bounce_threshold_velocity = 0.2
         self.sim.physx.bounce_threshold_velocity = 0.01

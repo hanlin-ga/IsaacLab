@@ -3,11 +3,10 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import os
 from omni.isaac.lab_assets import Z1_CFG
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
+from omni.isaac.lab.assets import AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
@@ -32,21 +31,7 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        self.scene.robot = Z1_CFG.replace(
-            prim_path="{ENV_REGEX_NS}/Robot",
-            init_state=ArticulationCfg.InitialStateCfg(
-                pos=(0, 0, 0),
-                joint_pos={
-                    "joint1": 0.0,
-                    "joint2": 0.8,   # 1.2  0.8
-                    "joint3": -0.7,  # -1.6  -0.7
-                    "joint4": 0.0,   # 0.3
-                    "joint5": 0.0,
-                    "joint6": 0.0,
-                    "finger_.*": 0.04,
-                },
-            ),
-        )
+        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         # Set actions for the specific robot type (Z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -61,27 +46,38 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
 
+        # Set Cube as object
+        # self.scene.object = RigidObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/Object",
+        #     init_state=RigidObjectCfg.InitialStateCfg(pos=[0.5, 0, 0.055], rot=[1, 0, 0, 0]),
+        #     spawn=UsdFileCfg(
+        #         usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+        #         scale=(0.8, 0.8, 0.8),
+        #         rigid_props=RigidBodyPropertiesCfg(
+        #             solver_position_iteration_count=16,
+        #             solver_velocity_iteration_count=1,
+        #             max_angular_velocity=1000.0,
+        #             max_linear_velocity=1000.0,
+        #             max_depenetration_velocity=5.0,
+        #             disable_gravity=False,
+        #         ),
+        #     ),
+        # )
 
         # Set 006_mustard_bottleas object
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.5, 0, 0.055], rot=[1, 0, 0, 0]  # rot=[0.7071068, -0.7071068, 0, 0]
-            ),
-            debug_vis=True,
+                pos=[0.5, 0, 0.075], rot=[0.7071068, -0.7071068, 0, 0]
+            ),  # rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/011_banana.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/008_pudding_box.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/035_power_drill.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),
-                
-                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(0.8, 0.8, 0.8),
+                usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
+                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
+                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/004_sugar_box.usd",
+                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
+                # usd_path=f"/home/hanlin/Downloads/Blocks/DexCube/dex_cube_instanceable.usd",
+                # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+                scale=(1.0, 1.0, 1.0),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -90,30 +86,13 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
                     max_depenetration_velocity=5.0,
                     disable_gravity=False,
                 ),
-                
             ),
         )
 
         # Listens to the required transforms
-        cam_marker_cfg = FRAME_MARKER_CFG.copy()
-        cam_marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
-        cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
-        self.scene.wrist_cam_frame = FrameTransformerCfg(
-            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
-            debug_vis=False,
-            visualizer_cfg=cam_marker_cfg,
-            target_frames=[
-                FrameTransformerCfg.FrameCfg(
-                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link",
-                    name="wrist_cam",
-                    offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
-                ),
-            ],
-        )
-        # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
-        marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
-        marker_cfg.prim_path = "/Visuals/FrameTransformer/end_effector"
+        marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
+        marker_cfg.prim_path = "/Visuals/FrameTransformer"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
             debug_vis=True,
@@ -122,15 +101,14 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="end_effector",
-                    offset=OffsetCfg(pos=[0.20, 0.0, 0.0], rot=[1, 0, 0, 0]),
+                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[0, 1, 0, 0]),
                 ),
             ],
         )
 
 
-
 @configclass
-class Z1LiftObjectEnvCfg_PLAY(Z1LiftObjectEnvCfg):
+class Z1CubeLiftEnvCfg_PLAY(Z1LiftObjectEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
