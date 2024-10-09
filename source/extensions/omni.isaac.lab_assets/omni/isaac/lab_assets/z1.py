@@ -28,7 +28,7 @@ Z1_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=os.path.join(
             os.path.expanduser("~"),
-            "IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper_small_joint6.usd",
+            "IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper.usd",
         ),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
@@ -43,8 +43,8 @@ Z1_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
             "joint1": 0.0,
-            "joint2": 0.8,   # 1.8
-            "joint3": -0.7,  # -1.22
+            "joint2": 1.8,   # 1.8
+            "joint3": -1.22,  # -1.22
             "joint4": 0.0,
             "joint5": 0.0,
             "joint6": 0.0,
