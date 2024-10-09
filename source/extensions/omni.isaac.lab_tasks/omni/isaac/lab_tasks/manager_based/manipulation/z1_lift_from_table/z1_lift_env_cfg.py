@@ -2,6 +2,7 @@
 # All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
+import os 
 
 from dataclasses import MISSING
 
@@ -57,7 +58,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
         spawn=sim_utils.UsdFileCfg(
-            usd_path=f"/home/hanlin/Downloads/Table/OakTableSmall.usd",
+            # usd_path=f"/home/hanlin/Downloads/Table/OakTableSmall.usd",
+            usd_path=os.path.join(os.path.expanduser("~"), "Downloads/Table/OakTableSmall.usd"),
             scale=(0.01, 0.02, 0.01),
             activate_contact_sensors=True,
         ),
