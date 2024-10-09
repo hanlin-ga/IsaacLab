@@ -17,7 +17,7 @@ class LiftCubePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
     save_interval = 50
-    experiment_name = "z1_lift_drawer"
+    experiment_name = "z1_lift_object_table"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,

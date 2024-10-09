@@ -46,10 +46,17 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     # object: AssetBaseCfg = MISSING
 
     # Table
+    # table = AssetBaseCfg(
+    #     prim_path="{ENV_REGEX_NS}/Table",
+    #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
+    #     spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+    # )
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
-        init_state=AssetBaseCfg.InitialStateCfg(pos=[0.5, 0, 0], rot=[0.707, 0, 0, 0.707]),
-        spawn=UsdFileCfg(usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Mounts/SeattleLabTable/table_instanceable.usd"),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/NVIDIA/Assets/ArchVis/Commercial/Tables/OakTableSmall.usd"
+        ),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
     )
 
     # plane

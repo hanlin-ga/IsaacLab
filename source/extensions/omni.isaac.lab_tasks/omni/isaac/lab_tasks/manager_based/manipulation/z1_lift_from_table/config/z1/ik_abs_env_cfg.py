@@ -16,7 +16,7 @@ from omni.isaac.lab_assets.franka import FRANKA_PANDA_HIGH_PD_CFG  # isort: skip
 
 
 @configclass
-class Z1CubeLiftEnvCfg(joint_pos_env_cfg.Z1CubeLiftEnvCfg):
+class Z1CubeLiftEnvCfg(joint_pos_env_cfg.Z1LiftObjectEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
