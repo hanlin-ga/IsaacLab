@@ -41,6 +41,8 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = MISSING
     # end-effector sensor: will be populated by agent env cfg
     ee_frame: FrameTransformerCfg = MISSING
+
+    wrist_cam_frame: FrameTransformerCfg = MISSING
     # target object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
 
@@ -153,7 +155,7 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.2, 0.1), "y": (-0.35, 0.35), "z": (0.0, 0.0)},
+            "pose_range": {"x": (-0.1, 0.0), "y": (-0.15, 0.15), "z": (0.0, 0.0)},
             "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object", body_names="Object"),
         },
@@ -264,6 +266,10 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
+
+        self.sim.disable_contact_processing = True
+        if self.scene.table_contact_forces is not None:
+            self.scene.table_contact_forces.update_period = self.sim.dt
 
         self.sim.physx.bounce_threshold_velocity = 0.2
         self.sim.physx.bounce_threshold_velocity = 0.01

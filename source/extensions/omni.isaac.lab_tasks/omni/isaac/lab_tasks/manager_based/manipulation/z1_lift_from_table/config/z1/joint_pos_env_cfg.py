@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
 from omni.isaac.lab_assets import Z1_CFG
 
 import omni.isaac.lab.sim as sim_utils
@@ -34,12 +35,12 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         self.scene.robot = Z1_CFG.replace(
             prim_path="{ENV_REGEX_NS}/Robot",
             init_state=ArticulationCfg.InitialStateCfg(
-                pos=(0, 0, 0),
+                pos=(0, 0, -0.02),
                 joint_pos={
                     "joint1": 0.0,
                     "joint2": 0.8,   # 1.2  0.8
                     "joint3": -0.7,  # -1.6  -0.7
-                    "joint4": 0.3,   # 0.3
+                    "joint4": 0.0,   # 0.3
                     "joint5": 0.0,
                     "joint6": 0.0,
                     "finger_.*": 0.04,
@@ -65,16 +66,22 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.5, 0, 0.072], rot=[0.7071068, -0.7071068, 0, 0]
-            ),  # rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.5, 0, 0.05], rot=[0.7071068, -0.7071068, 0, 0]
+            ),
+            debug_vis=True,
             spawn=UsdFileCfg(
-                usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",
-                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd",
-                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/004_sugar_box.usd",
-                # usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/035_power_drill.usd",
-                # usd_path=f"/home/hanlin/Downloads/Blocks/DexCube/dex_cube_instanceable.usd",
+                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/011_banana.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/008_pudding_box.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/035_power_drill.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),
+                
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
+                scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -83,13 +90,30 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
                     max_depenetration_velocity=5.0,
                     disable_gravity=False,
                 ),
+                
             ),
         )
 
         # Listens to the required transforms
+        cam_marker_cfg = FRAME_MARKER_CFG.copy()
+        cam_marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
+        cam_marker_cfg.prim_path = "/Visuals/FrameTransformer/wrist_cam"
+        self.scene.wrist_cam_frame = FrameTransformerCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
+            debug_vis=False,
+            visualizer_cfg=cam_marker_cfg,
+            target_frames=[
+                FrameTransformerCfg.FrameCfg(
+                    prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link",
+                    name="wrist_cam",
+                    offset=OffsetCfg(pos=[0.0, 0.0, 0.0], rot=[1, 0, 0, 0]),
+                ),
+            ],
+        )
+        # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
-        marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
-        marker_cfg.prim_path = "/Visuals/FrameTransformer"
+        marker_cfg.markers["frame"].scale = (0.06, 0.06, 0.06)
+        marker_cfg.prim_path = "/Visuals/FrameTransformer/end_effector"
         self.scene.ee_frame = FrameTransformerCfg(
             prim_path="{ENV_REGEX_NS}/Robot/z1_description/link00",
             debug_vis=True,
@@ -98,10 +122,11 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="end_effector",
-                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[0, 1, 0, 0]),
+                    offset=OffsetCfg(pos=[0.20, 0.0, 0.0], rot=[1, 0, 0, 0]),
                 ),
             ],
         )
+
 
 
 @configclass
