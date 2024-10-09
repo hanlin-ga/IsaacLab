@@ -35,7 +35,7 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         self.scene.robot = Z1_CFG.replace(
             prim_path="{ENV_REGEX_NS}/Robot",
             init_state=ArticulationCfg.InitialStateCfg(
-                pos=(0, 0, -0.02),
+                pos=(0, 0, 0),
                 joint_pos={
                     "joint1": 0.0,
                     "joint2": 0.8,   # 1.2  0.8
@@ -66,11 +66,11 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.5, 0, 0.05], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.5, 0, 0.055], rot=[1, 0, 0, 0]  # rot=[0.7071068, -0.7071068, 0, 0]
             ),
             debug_vis=True,
             spawn=UsdFileCfg(
-                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
@@ -80,7 +80,7 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),
                 
-                # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(0.8, 0.8, 0.8),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
