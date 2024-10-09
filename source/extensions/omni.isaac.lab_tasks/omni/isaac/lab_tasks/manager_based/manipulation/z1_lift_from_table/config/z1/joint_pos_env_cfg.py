@@ -6,7 +6,7 @@
 from omni.isaac.lab_assets import Z1_CFG
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import AssetBaseCfg, RigidObjectCfg
+from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
 from omni.isaac.lab.sensors import FrameTransformerCfg
 from omni.isaac.lab.sensors.frame_transformer.frame_transformer_cfg import OffsetCfg
 from omni.isaac.lab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
@@ -31,7 +31,21 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         super().__post_init__()
 
         # Set Franka as robot
-        self.scene.robot = Z1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = Z1_CFG.replace(
+            prim_path="{ENV_REGEX_NS}/Robot",
+            init_state=ArticulationCfg.InitialStateCfg(
+                pos=(0, 0, 0),
+                joint_pos={
+                    "joint1": 0.0,
+                    "joint2": 0.8,   # 1.2  0.8
+                    "joint3": -0.7,  # -1.6  -0.7
+                    "joint4": 0.0,   # 0.3
+                    "joint5": 0.0,
+                    "joint6": 0.0,
+                    "finger_.*": 0.04,
+                },
+            ),
+        )
 
         # Set actions for the specific robot type (Z1)
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -68,7 +82,7 @@ class Z1LiftObjectEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.5, 0, 0.075], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.5, 0, 0.072], rot=[0.7071068, -0.7071068, 0, 0]
             ),  # rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
                 usd_path=f"/home/hanlin/Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd",

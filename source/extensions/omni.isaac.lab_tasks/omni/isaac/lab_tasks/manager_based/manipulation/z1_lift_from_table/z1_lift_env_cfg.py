@@ -7,6 +7,7 @@ from dataclasses import MISSING
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
+from omni.isaac.lab.sensors import ContactSensorCfg
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
@@ -54,11 +55,14 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
         spawn=sim_utils.UsdFileCfg(
-            usd_path=f"/home/hanlin/Downloads/Table/table.usd",
-            # scale=(0.01, 0.02, 0.01),
+            usd_path=f"/home/hanlin/Downloads/Table/OakTableSmall.usd",
+            scale=(0.01, 0.02, 0.01),
+            activate_contact_sensors=True,
         ),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.3, 0.0, -1.1)),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.3, 0.0, -1.0)),
     )
+    
+    cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table", history_length=3, track_air_time=True)
 
     # plane
     plane = AssetBaseCfg(
@@ -194,9 +198,9 @@ class TerminationsCfg:
 
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
 
-    object_dropping = DoneTerm(
-        func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
-    )
+    # object_dropping = DoneTerm(
+    #     func=mdp.root_height_below_minimum, params={"minimum_height": -0.05, "asset_cfg": SceneEntityCfg("object")}
+    # )
 
 
 @configclass
