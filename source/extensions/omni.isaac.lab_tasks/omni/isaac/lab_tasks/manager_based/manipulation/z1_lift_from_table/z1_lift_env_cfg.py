@@ -54,9 +54,10 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     table = AssetBaseCfg(
         prim_path="{ENV_REGEX_NS}/Table",
         spawn=sim_utils.UsdFileCfg(
-            usd_path=f"/home/hanlin/Downloads/isaac-sim-assets-2-4.1.0/Assets/Isaac/4.0/NVIDIA/Assets/ArchVis/Commercial/Tables/OakTableSmall.usd"
+            usd_path=f"/home/hanlin/Downloads/Table/table.usd",
+            # scale=(0.01, 0.02, 0.01),
         ),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
+        init_state=AssetBaseCfg.InitialStateCfg(pos=(0.3, 0.0, -1.1)),
     )
 
     # plane

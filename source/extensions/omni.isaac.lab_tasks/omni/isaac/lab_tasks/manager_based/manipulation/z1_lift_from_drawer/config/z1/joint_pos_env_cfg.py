@@ -36,7 +36,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.scene.robot = Z1_CFG.replace(
             prim_path="{ENV_REGEX_NS}/Robot",
             init_state=ArticulationCfg.InitialStateCfg(
-                pos=(0, 0, 0.65),
+                pos=(0, 0, 0.58),
                 joint_pos={
                     "joint1": 0.0,
                     "joint2": 0.8,   # 1.2  0.8
@@ -67,7 +67,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.3, 0, 0.75], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.3, 0, 0.90], rot=[0.7071068, -0.7071068, 0, 0]
             ),
             spawn=UsdFileCfg(
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
