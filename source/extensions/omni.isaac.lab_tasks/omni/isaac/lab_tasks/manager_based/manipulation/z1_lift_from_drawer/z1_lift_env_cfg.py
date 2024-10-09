@@ -238,7 +238,7 @@ class RewardsCfg:
         weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
-
+    
     # calculate the undersired contacts penalty
     cabinet_sektion_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
@@ -257,6 +257,12 @@ class RewardsCfg:
     joint_pos = RewTerm(
         func=mdp.joint_deviation_l1_condition,
         weight=-1,
+        params={"distance_threshold": 0.03, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
+    )              
+
+    release_reward = RewTerm(
+        func=mdp.release_reward,
+        weight=1.0,
         params={"distance_threshold": 0.03, "command_name": "disc_pose", "asset_cfg": SceneEntityCfg("robot")},
     )              
 

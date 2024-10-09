@@ -116,6 +116,8 @@ def object_goal_distance(
     distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
     condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
 
+    # print("distance_xy is ", distance_xy)
+
     # rewarded if the object is lifted above the threshold
     return condition * (1 - torch.tanh(distance / std))
 
@@ -132,21 +134,45 @@ def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
     # compute out of limits constraints
     angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
 
-    angle[:, 6] = 10 * angle[:, 6]
-    angle[:, 7] = 10 * angle[:, 7]
-
-    # set the condition
-    # robot: RigidObject = env.scene[robot_cfg.name]
-    # object: RigidObject = env.scene[object_cfg.name]
-    # command = env.command_manager.get_command(command_name)
-    # # compute the desired position in the world frame
-    # des_pos_b = command[:, :3]
-    # des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
-    # # distance of the end-effector to the object: (num_envs,)
-    # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    # condition = (distance_xy < distance_threshold)
+    angle[:, 6] = 100 * angle[:, 6]
+    angle[:, 7] = 100 * angle[:, 7]
 
     return torch.sum(torch.abs(angle), dim=1)
+
+def release_reward(env: ManagerBasedRLEnv,
+                                 distance_threshold: float,
+                                 command_name: str,
+
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+                                 robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                                 asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    # angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+
+    # set the condition
+    robot: RigidObject = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    # compute the desired position in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    # distance of the end-effector to the object: (num_envs,)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (distance_xy < distance_threshold)
+
+    # Calculate extra reward based on joint positions if the condition is met
+    joint_pos_6_7 = torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids][:, 6]) + \
+                    torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids][:, 7])
+    extra_reward = torch.where(condition, joint_pos_6_7 * 200, torch.tensor(0.0, device=joint_pos_6_7.device))
+
+    
+    condition1 = (torch.abs(asset.data.joint_pos[:, asset_cfg.joint_ids][:, 6]) > 0.03)
+    combined_condition = condition & condition1
+    extra_reward1 = torch.where(combined_condition, 10, torch.tensor(0.0, device=joint_pos_6_7.device))
+    
+    # Return the absolute value of the extra reward
+    return extra_reward+extra_reward1
 
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
