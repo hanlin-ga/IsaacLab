@@ -37,8 +37,8 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 pos=(0, 0, 0.93),
                 joint_pos={
                     "joint1": 0.0,
-                    "joint2": 1.8,   # 1.2  0.8  1.8
-                    "joint3": -1.22,  # -1.6  -0.7  -1.22
+                    "joint2": 1.8,   #   0.8  1.8
+                    "joint3": -1.22,  #   -0.7  -1.22
                     "joint4": 0.0,
                     "joint5": 0.0,
                     "joint6": 0.0,
