@@ -43,8 +43,8 @@ Z1_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={
             "joint1": 0.0,
-            "joint2": 0.8,   # 1.8
-            "joint3": -0.7,  # -1.22
+            "joint2": 1.8,   # 1.8
+            "joint3": -1.22,  # -1.22
             "joint4": 0.0,
             "joint5": 0.0,
             "joint6": 0.0,

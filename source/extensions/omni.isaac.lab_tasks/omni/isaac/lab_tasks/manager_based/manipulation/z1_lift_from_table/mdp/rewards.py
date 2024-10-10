@@ -23,6 +23,7 @@ def object_is_lifted(
 ) -> torch.Tensor:
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
+    # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
     return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
 
 
@@ -87,6 +88,19 @@ def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> 
     # print("torch.abs(angle) shape is ", torch.abs(angle).shape)
     return torch.abs(asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5])
 
+def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg, ID: String) -> torch.Tensor:
+    """Penalize undesired contacts as the number of violations that are above a threshold."""
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # check if contact force is above threshold
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+    is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+
+    # print("ID is ", ID)
+    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
+
+    # sum over contacts for each environment
+    return torch.sum(is_contact, dim=1)
 
 def last_finger_rate(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Penalize the rate of change of the actions using L2 squared kernel."""
