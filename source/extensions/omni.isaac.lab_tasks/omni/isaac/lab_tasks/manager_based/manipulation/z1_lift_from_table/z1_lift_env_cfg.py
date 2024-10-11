@@ -114,18 +114,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    # camera = CameraCfg(
-    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-    #     update_period=0.0333,
-    #     height=360,
-    #     width=640,
-    #     data_types=["rgb"],
-    #     # data_types=["rgb", "distance_to_image_plane"],
-    #     spawn=sim_utils.PinholeCameraCfg(
-    #         focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-    #     ),
-    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    # )
+    camera = CameraCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+        update_period=0.0333,
+        height=360,
+        width=640,
+        data_types=["rgb"],
+        # data_types=["rgb", "distance_to_image_plane"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+        ),
+        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    )
 
     # lights
     light = AssetBaseCfg(
@@ -207,19 +207,19 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.007}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005}, weight=15.0)
 
-    # object_goal_tracking = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.3, "minimal_height": 1.00, "command_name": "object_pose"},
-    #     weight=16.0,
-    # )
+    object_goal_tracking = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.3, "minimal_height": 1.005, "command_name": "object_pose"},
+        weight=16.0,
+    )
 
-    # object_goal_tracking_fine_grained = RewTerm(
-    #     func=mdp.object_goal_distance,
-    #     params={"std": 0.05, "minimal_height": 1.00, "command_name": "object_pose"},
-    #     weight=5.0,
-    # )
+    object_goal_tracking_fine_grained = RewTerm(
+        func=mdp.object_goal_distance,
+        params={"std": 0.05, "minimal_height": 1.005, "command_name": "object_pose"},
+        weight=5.0,
+    )
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
@@ -238,7 +238,7 @@ class RewardsCfg:
     )
 
     joint_pos = RewTerm(
-        func=mdp.joint_deviation_l1,
+        func=mdp.joint_deviation_l1_six_joints,
         weight=-1e-4,
         params={"asset_cfg": SceneEntityCfg("robot")},
     )      
@@ -254,9 +254,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    # object_arrive = DoneTerm(
-    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
-    # )
+    object_arrive = DoneTerm(
+        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.02, "command_name": "object_pose"}
+    )
 
 @configclass
 class CurriculumCfg:
@@ -271,7 +271,7 @@ class CurriculumCfg:
     )
 
     joint_pos = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 20000}
+        func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
     )
 
 
