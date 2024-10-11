@@ -37,9 +37,9 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 pos=(0, 0, 0.93),
                 joint_pos={
                     "joint1": 0.0,
-                    "joint2": 1.8,   #   0.8  1.8
-                    "joint3": -1.22,  #   -0.7  -1.22
-                    "joint4": 0.0,
+                    "joint2": 0.8,   #   0.8  1.8
+                    "joint3": -0.7,  #   -0.7  -1.22
+                    "joint4": 0.2,
                     "joint5": 0.0,
                     "joint6": 0.0,
                     "finger_.*": 0.04,
@@ -71,13 +71,13 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/011_banana.usd"),
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/008_pudding_box.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/035_power_drill.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
                 
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
+                scale=(1, 1, 1),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
@@ -101,7 +101,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
                 FrameTransformerCfg.FrameCfg(
                     prim_path="{ENV_REGEX_NS}/Robot/z1_description/gripper_link",
                     name="end_effector",
-                    offset=OffsetCfg(pos=[0.18, 0.0, 0.0], rot=[0, 1, 0, 0]),
+                    offset=OffsetCfg(pos=[0.2, 0.0, 0.0], rot=[0, 1, 0, 0]),
                 ),
             ],
         )
