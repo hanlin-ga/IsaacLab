@@ -97,7 +97,7 @@ def object_goal_distance_six_joint(
     # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
 
     # rewarded if the object is lifted above the threshold
-    return (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)
+    return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
 
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
