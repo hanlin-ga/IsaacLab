@@ -102,6 +102,19 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)
 
+
+def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids][0:6] - asset.data.default_joint_pos[:, asset_cfg.joint_ids][0:6]
+    print("joint angles are ", asset.data.joint_pos[:, asset_cfg.joint_ids][0:6])
+    # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
+    return torch.sum(torch.abs(angle), dim=1)
+
+
+
 def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
                                  distance_threshold: float,
                                  command_name: str,
