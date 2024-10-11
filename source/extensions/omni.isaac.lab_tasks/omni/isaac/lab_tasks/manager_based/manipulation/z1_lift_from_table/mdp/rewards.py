@@ -108,10 +108,10 @@ def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCf
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
     # compute out of limits constraints
-    angle = asset.data.joint_pos[:, asset_cfg.joint_ids][0:6] - asset.data.default_joint_pos[:, asset_cfg.joint_ids][0:6]
-    print("joint angles are ", asset.data.joint_pos[:, asset_cfg.joint_ids][0:6])
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+
     # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
-    return torch.sum(torch.abs(angle), dim=1)
+    return torch.sum(torch.abs(angle[:,0:6]), dim=1)
 
 
 
