@@ -44,6 +44,8 @@ def object_ee_distance(
     # Distance of the end-effector to the object: (num_envs,)
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
 
+    # print("ee_w is ", ee_w)
+
     return 1 - torch.tanh(object_ee_distance / std)
 
 
