@@ -65,7 +65,7 @@ class Z1CubePlaceEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.2878, 0, 0.27], rot=[0.7071068, -0.7071068, 0, 0]
+                pos=[0.2878, 0, 1.23], rot=[0.7071068, -0.7071068, 0, 0]
             ),  # rot=[0.7071068, -0.7071068, 0, 0]
             spawn=UsdFileCfg(
                 usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
