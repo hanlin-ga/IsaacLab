@@ -95,14 +95,6 @@ def object_goal_distance_six_joint(
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-<<<<<<< HEAD
-    print("angle is ", angle)
-    # print("default_joint_pos is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
-    # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
-    # print("(object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1) is ", (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1))
-    # rewarded if the object is lifted above the threshold
-    return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1)
-=======
     # print("*"*100)
     
     # print("asset.data.joint_pos[:, robot_cfg.joint_ids] is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
@@ -114,7 +106,6 @@ def object_goal_distance_six_joint(
     # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
     return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
->>>>>>> 7a5d4532408f17aa0b401bfdd2b1a605ea4bd679
 
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
