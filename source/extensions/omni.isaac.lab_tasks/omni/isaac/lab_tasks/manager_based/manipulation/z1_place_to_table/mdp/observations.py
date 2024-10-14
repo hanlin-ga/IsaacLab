@@ -29,3 +29,14 @@ def object_position_in_robot_root_frame(
         robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], object_pos_w
     )
     return object_pos_b
+
+def object_pose_obs(env: ManagerBasedRLEnv, 
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    
+    object: RigidObject = env.scene[object_cfg.name]
+
+    cube_quat_w = object.data.root_quat_w
+    # default_quat_w = object.data.default_root_state[:, 3:7]
+    # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
+
+    return cube_quat_w

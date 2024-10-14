@@ -250,11 +250,7 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 30, "ID": "cabinet_sektion"},
     )
 
-    # joint_pos = RewTerm(
-    #     func=mdp.joint_deviation_l1_six_joints,
-    #     weight=-1e-4,
-    #     params={"asset_cfg": SceneEntityCfg("robot")},
-    # )      
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
 
 @configclass
 class TerminationsCfg:

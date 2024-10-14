@@ -13,6 +13,8 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
+from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate, quat_error_magnitude_xy
+
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -151,6 +153,19 @@ def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCf
     # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
     return torch.sum(torch.abs(angle[:,0:6]), dim=1)
 
+
+def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
+                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    
+    object: RigidObject = env.scene[object_cfg.name]
+
+    cube_quat_w = object.data.root_quat_w
+    default_quat_w = object.data.default_root_state[:, 3:7]
+    # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
+    # example_quat_w = object.data.default_root_state[:, 3:7]
+    # print("example angle diff is ", quat_error_magnitude_xy(cube_quat_w , default_quat_w))
+    # print("orientation_diff is ", orientation_diff)
+    return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
 
 
 def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
