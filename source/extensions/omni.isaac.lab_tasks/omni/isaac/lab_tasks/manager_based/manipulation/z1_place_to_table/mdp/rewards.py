@@ -13,25 +13,44 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
-from omni.isaac.lab.utils.math import quat_conjugate, quat_from_angle_axis, quat_mul, sample_uniform, saturate, quat_error_magnitude_xy
+from .math import quat_error_magnitude_xy
 
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 
-def object_is_lifted(
-    env: ManagerBasedRLEnv, minimal_height: float, object_cfg: SceneEntityCfg = SceneEntityCfg("object")
-) -> torch.Tensor:
+def object_is_lifted(env: ManagerBasedRLEnv, 
+                     minimal_height: float,
+
+                     distance_threshold: float,
+                     command_name: str,
+                     
+                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
-    # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
-    return torch.where(object.data.root_pos_w[:, 2] > minimal_height, 1.0, 0.0)
+
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
+
+    # compute the distance between object and disc_pose
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
+
+    return torch.where(condition, 1.0, 0.0) 
 
 
 def object_ee_distance(
     env: ManagerBasedRLEnv,
     std: float,
+
+    distance_threshold: float,
+    command_name: str,
+
+    robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
     ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
 ) -> torch.Tensor:
@@ -46,18 +65,30 @@ def object_ee_distance(
     # Distance of the end-effector to the object: (num_envs,)
     object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
 
-    # print("ee_w is ", ee_w)
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
 
-    return 1 - torch.tanh(object_ee_distance / std)
+    # compute the distance between object and disc_pose
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = distance_xy > distance_threshold
+
+    return 1 - torch.tanh(object_ee_distance / std)*condition
 
 
 def object_goal_distance(
     env: ManagerBasedRLEnv,
     std: float,
+
+    delta_z: float,
+    distance_threshold: float,
     minimal_height: float,
     command_name: str,
+
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    
 ) -> torch.Tensor:
     """Reward the agent for tracking the goal pose using tanh-kernel."""
     # extract the used quantities (to enable type-hinting)
@@ -67,19 +98,30 @@ def object_goal_distance(
     # compute the desired position in the world frame
     des_pos_b = command[:, :3]
     des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
     # distance of the end-effector to the object: (num_envs,)
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
+    # calcualte the distance between object and disc_pose
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
+
+    # print("distance_xy is ", distance_xy)
+
     # rewarded if the object is lifted above the threshold
-    return (object.data.root_pos_w[:, 2] > minimal_height) * (1 - torch.tanh(distance / std))
+    return condition * (1 - torch.tanh(distance / std))
 
 
 
 def object_goal_distance_six_joint(
     env: ManagerBasedRLEnv,
     std: float,
+
+    delta_z: float,
+    distance_threshold: float,
     minimal_height: float,
     command_name: str,
+
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
 ) -> torch.Tensor:
@@ -93,10 +135,17 @@ def object_goal_distance_six_joint(
     # compute the desired position in the world frame
     des_pos_b = command[:, :3]
     des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
+
     # distance of the end-effector to the object: (num_envs,)
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
+    # the angle difference between the current joint position and the default one
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+
+    # calcualte the distance between object and disc_pose
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
     # print("*"*100)
     
     # print("asset.data.joint_pos[:, robot_cfg.joint_ids] is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
@@ -107,7 +156,7 @@ def object_goal_distance_six_joint(
     # rewarded if the object is lifted above the threshold
     # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
-    return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0) 
+    return condition  * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0) 
 
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:

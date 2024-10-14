@@ -220,18 +220,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "minimal_height": 1.005, "command_name": "object_pose"},
+        params={"std": 0.3, "delta_z": 0.0, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "minimal_height": 1.005, "command_name": "object_pose"},
+        params={"std": 0.05, "delta_z": 0.0, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=5.0,
     )
 
