@@ -58,6 +58,7 @@ class Z1CubePlaceEnvCfg(Z1LiftEnvCfg):
         )
         # Set the body name for the end effector
         self.commands.object_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
+        self.commands.disc_pose.body_name = "gripper_link"  # gripper_link or finger_right_link
 
 
         # Set 006_mustard_bottleas object
