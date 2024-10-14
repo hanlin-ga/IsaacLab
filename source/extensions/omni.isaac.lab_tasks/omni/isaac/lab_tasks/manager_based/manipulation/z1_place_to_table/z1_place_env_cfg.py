@@ -154,6 +154,16 @@ class CommandsCfg:
         ),
     )
 
+    disc_pose = mdp.UniformDiskPoseCommandCfg(
+        asset_name="robot",
+        body_name=MISSING,  # will be set by agent env cfg
+        resampling_time_range=(5.0, 5.0),
+        debug_vis=True,
+        ranges=mdp.UniformDiskPoseCommandCfg.Ranges(
+            pos_x=(-0.18, 0.18), pos_y=(-0.5, -0.5), pos_z=(0.15, 0.15), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ),
+    )
+
 
 @configclass
 class ActionsCfg:
