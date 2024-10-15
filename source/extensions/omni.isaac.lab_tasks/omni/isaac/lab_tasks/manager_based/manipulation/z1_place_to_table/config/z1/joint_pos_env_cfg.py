@@ -15,7 +15,7 @@ from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from omni.isaac.lab_tasks.manager_based.manipulation.lift import mdp
-from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table.z1_place_env_cfg import Z1LiftEnvCfg
+from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table.z1_place_env_cfg import Z1PlaceEnvCfg
 
 ##
 # Pre-defined configs
@@ -25,7 +25,7 @@ from omni.isaac.lab.markers.config import FRAME_MARKER_CFG  # isort: skip
 
 
 @configclass
-class Z1CubePlaceEnvCfg(Z1LiftEnvCfg):
+class Z1CubePlaceEnvCfg(Z1PlaceEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
