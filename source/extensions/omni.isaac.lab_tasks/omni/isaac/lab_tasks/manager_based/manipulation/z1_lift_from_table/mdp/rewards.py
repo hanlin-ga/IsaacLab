@@ -140,6 +140,7 @@ def end_effector_orientation_diff_rew(
     env: ManagerBasedRLEnv, 
     default_quat: list[float],
     ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
 ) -> torch.Tensor:
     """Calculate the orientation difference reward for the end-effector."""
     ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
@@ -147,5 +148,17 @@ def end_effector_orientation_diff_rew(
     ee_quat_w = ee_frame.data.target_quat_w[..., 0, :]  
     num_envs = ee_quat_w.shape[0]
     default_quat_w = torch.tensor(default_quat, device=ee_quat_w.device).repeat(num_envs, 1)  # Ensure the shape is [num_envs, 4]
+    # print("ee_quat_w shape is ", ee_quat_w.shape)
+    # print("default_quat_w shape is ", default_quat_w.shape)
+    # print("default_quat_w 1 is ", default_quat_w)
+
+    # object: RigidObject = env.scene[object_cfg.name]
+    # cube_quat_w = object.data.root_quat_w
+    # default_quat_w = object.data.default_root_state[:, 3:7]
+
+    # print("default_quat_w 2 is ", default_quat_w)
+    # print("*"*100)
+    # print("quat_error_magnitude_y(ee_quat_w, default_quat_w) is ", quat_error_magnitude_y(ee_quat_w, default_quat_w))
 
     return quat_error_magnitude_y(ee_quat_w, default_quat_w)
+    # return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
