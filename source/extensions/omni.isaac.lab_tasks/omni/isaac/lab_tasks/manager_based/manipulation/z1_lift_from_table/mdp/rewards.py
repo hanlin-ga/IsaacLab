@@ -13,6 +13,7 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
+from .math import quat_error_magnitude_xy, quat_error_magnitude_y, quat_error_magnitude_x
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -95,7 +96,7 @@ def object_goal_distance_six_joint(
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-    print("angle is ", angle)
+    # print("angle is ", angle)
     # print("default_joint_pos is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
     # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
     # print("(object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1) is ", (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1))
@@ -135,36 +136,16 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     return torch.sum(is_contact, dim=1)
 
 
-def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
-    """Penalize joint positions that deviate from the default one."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    # compute out of limits constraints
-    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+def end_effector_orientation_diff_rew(
+    env: ManagerBasedRLEnv, 
+    default_quat: list[float],
+    ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame"),
+) -> torch.Tensor:
+    """Calculate the orientation difference reward for the end-effector."""
+    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+    
+    ee_quat_w = ee_frame.data.target_quat_w[..., 0, :]  
+    num_envs = ee_quat_w.shape[0]
+    default_quat_w = torch.tensor(default_quat, device=ee_quat_w.device).repeat(num_envs, 1)  # Ensure the shape is [num_envs, 4]
 
-    # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
-    return torch.sum(torch.abs(angle[:,0:6]), dim=1)
-
-
-
-def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
-                                 distance_threshold: float,
-                                 command_name: str,
-
-                                 object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
-                                 robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-                                 asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
-    """Penalize joint positions that deviate from the default one."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    # compute out of limits constraints
-    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
-
-    return torch.sum(torch.abs(angle), dim=1)
-
-def last_finger_rate(env: ManagerBasedRLEnv) -> torch.Tensor:
-    """Penalize the rate of change of the actions using L2 squared kernel."""
-    # print("env.action_manager.action[:,6] is ", env.action_manager.action[:,6])
-    # print("env.action_manager.action[:,7] is ", env.action_manager.action[:,7])
-    return torch.abs(env.action_manager.action[:, 6] + env.action_manager.prev_action[:, 7]) < 0.02
-    # return torch.sum(torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1)
+    return quat_error_magnitude_y(ee_quat_w, default_quat_w)
