@@ -717,7 +717,9 @@ def quat_error_magnitude_x(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     quat_diff = quat_mul(q1, quat_conjugate(q2))
     axis_angle = axis_angle_from_quat(quat_diff)
 
-    return torch.norm(axis_angle[..., 0], dim=-1)
+    x_rotation_magnitude = torch.abs(axis_angle[..., 0])
+
+    return x_rotation_magnitude
 
 @torch.jit.script
 def quat_error_magnitude_y(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
@@ -733,8 +735,13 @@ def quat_error_magnitude_y(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     quat_diff = quat_mul(q1, quat_conjugate(q2))
     axis_angle = axis_angle_from_quat(quat_diff)
 
-    return torch.norm(axis_angle[..., 1], dim=-1)
+    # Extract the y-component of the axis
+    y_axis_rotation = axis_angle[..., 1]
 
+    # Compute the angle of rotation only around the y-axis
+    y_angle_magnitude = torch.abs(y_axis_rotation)
+
+    return y_angle_magnitude
 @torch.jit.script
 def skew_symmetric_matrix(vec: torch.Tensor) -> torch.Tensor:
     """Computes the skew-symmetric matrix of a vector.

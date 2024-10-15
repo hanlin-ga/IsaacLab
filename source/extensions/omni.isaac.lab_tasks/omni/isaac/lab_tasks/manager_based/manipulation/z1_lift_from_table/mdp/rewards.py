@@ -13,7 +13,7 @@ from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 from omni.isaac.lab.utils.math import combine_frame_transforms
-from .math import quat_error_magnitude_xy, quat_error_magnitude_y, quat_error_magnitude_x
+from .math import quat_error_magnitude_xy, quat_error_magnitude_y, quat_error_magnitude_x, quat_error_magnitude
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -159,6 +159,6 @@ def end_effector_orientation_diff_rew(
     # print("default_quat_w 2 is ", default_quat_w)
     # print("*"*100)
     # print("quat_error_magnitude_y(ee_quat_w, default_quat_w) is ", quat_error_magnitude_y(ee_quat_w, default_quat_w))
+    # print("quat_error_magnitude(ee_quat_w, default_quat_w) is ", quat_error_magnitude(ee_quat_w, default_quat_w))
 
     return quat_error_magnitude_y(ee_quat_w, default_quat_w)
-    # return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
