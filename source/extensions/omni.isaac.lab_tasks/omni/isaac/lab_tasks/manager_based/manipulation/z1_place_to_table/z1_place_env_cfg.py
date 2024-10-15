@@ -143,14 +143,24 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    object_pose = mdp.UniformPoseCommandCfg(
+    # object_pose = mdp.UniformPoseCommandCfg(
+    #     asset_name="robot",
+    #     body_name=MISSING,  # will be set by agent env cfg
+    #     resampling_time_range=(5.0, 5.0),
+    #     debug_vis=True,
+    #     ranges=mdp.UniformPoseCommandCfg.Ranges(   #0.3707, -0.0079,  1.2895
+    #         # pos_x=(0.2976, 0.2976), pos_y=(0, 0), pos_z=(0.35, 0.35), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+    #         pos_x=(0.2878, 0.2878), pos_y=(0, 0), pos_z=(0.27, 0.27), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+    #     ),
+    # )
+
+    disc_pose = mdp.UniformDiskPoseCommandCfg(
         asset_name="robot",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
-        ranges=mdp.UniformPoseCommandCfg.Ranges(   #0.3707, -0.0079,  1.2895
-            # pos_x=(0.2976, 0.2976), pos_y=(0, 0), pos_z=(0.35, 0.35), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
-            pos_x=(0.2878, 0.2878), pos_y=(0, 0), pos_z=(0.27, 0.27), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+        ranges=mdp.UniformDiskPoseCommandCfg.Ranges(
+            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.0, 0.0), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -175,7 +185,10 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
+
+        object_pose_obs = ObsTerm(func=mdp.object_pose_obs)
+        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "disc_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -192,33 +205,33 @@ class EventCfg:
 
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
-    reset_object_position = EventTerm(
-        func=mdp.reset_root_state_uniform,
-        mode="reset",
-        params={
-            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
-            "velocity_range": {},
-            "asset_cfg": SceneEntityCfg("object", body_names="Object"),
-        },
-    )
+    # reset_object_position = EventTerm(
+    #     func=mdp.reset_root_state_uniform,
+    #     mode="reset",
+    #     params={
+    #         "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+    #         "velocity_range": {},
+    #         "asset_cfg": SceneEntityCfg("object", body_names="Object"),
+    #     },
+    # )
 
 
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "minimal_height": 1.005, "command_name": "object_pose"},
+        params={"std": 0.3, "delta_z": 0.07, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "minimal_height": 1.005, "command_name": "object_pose"},
+        params={"std": 0.05, "delta_z": 0.07, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -234,14 +247,12 @@ class RewardsCfg:
     cabinet_sektion_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 30, "ID": "cabinet_sektion"},
+        params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 50, "ID": "cabinet_sektion"},
     )
 
-    # joint_pos = RewTerm(
-    #     func=mdp.joint_deviation_l1_six_joints,
-    #     weight=-1e-4,
-    #     params={"asset_cfg": SceneEntityCfg("robot")},
-    # )      
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
+
+    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=100.0)
 
 @configclass
 class TerminationsCfg:
@@ -290,7 +301,7 @@ class CurriculumCfg:
 
 
 @configclass
-class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
+class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the lifting environment."""
 
     # Scene settings
