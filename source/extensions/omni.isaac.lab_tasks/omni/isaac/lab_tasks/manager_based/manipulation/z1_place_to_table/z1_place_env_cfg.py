@@ -252,7 +252,7 @@ class RewardsCfg:
 
     object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
 
-    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=100.0)
 
 @configclass
 class TerminationsCfg:
