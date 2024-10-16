@@ -67,7 +67,7 @@ class Z1CubePlaceEnvCfg(Z1PlaceEnvCfg):
             init_state=RigidObjectCfg.InitialStateCfg(
                 pos=[0.2878, 0, 1.23], rot=[0.7071068, -0.7071068, 0, 0]
             ),  # rot=[0.7071068, -0.7071068, 0, 0]
-            spawn=UsdFileCfg(
+            spawn=sim_utils.UsdFileCfg(
                 usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
@@ -79,6 +79,7 @@ class Z1CubePlaceEnvCfg(Z1PlaceEnvCfg):
                 
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
                 scale=(1, 1, 1),
+                activate_contact_sensors=True,
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,

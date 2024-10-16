@@ -103,6 +103,7 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Cabinet/.*", history_length=3, track_air_time=True)
+    object_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Object", history_length=3, track_air_time=True)
     # table_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table/.*", history_length=3, track_air_time=True)
     # robot_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/z1_description/.*", history_length=3, track_air_time=True)
 
