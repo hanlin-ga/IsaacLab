@@ -82,7 +82,7 @@ def release_reward(env: ManagerBasedRLEnv,
     print("condition is ", condition)
     print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
 
-    return condition * (0.04 - torch.abs(angle[:,6]))
+    return condition * (0.04 - torch.abs(angle[:,6]) - 0.0316)
 
 
 
@@ -209,8 +209,10 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # print("net_contact_forces is ", net_contact_forces)
     # print("torch.sum(is_contact, dim=1) is ", torch.sum(is_contact, dim=1))
 
-    # print("ID is ", ID)
-    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
+    print("*"*100)
+    print("ID is ", ID)
+    print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])
+    print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)
