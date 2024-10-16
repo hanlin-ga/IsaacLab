@@ -16,7 +16,7 @@ from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
 class PlaceCubePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 5000
-    save_interval = 50
+    save_interval = 100
     experiment_name = "z1_place_to_table"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
