@@ -73,8 +73,8 @@ def release_reward(env: ManagerBasedRLEnv,
 
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
 
-    current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
-    default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+    # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
+    # default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
     # print("current_angle is ", current_angle[:,6])
     # print("default_angle is ", default_angle[:,6])
     # print("angle[:,6] is ", angle[:,6])
