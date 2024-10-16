@@ -47,45 +47,6 @@ def object_is_lifted(env: ManagerBasedRLEnv,
     return torch.where(condition, 1.0, 0.0) 
 
 
-def release_reward(env: ManagerBasedRLEnv, 
-
-                     delta_z: float,
-                     distance_threshold: float,
-                     command_name: str,
-                     
-                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
-    """Reward the agent for lifting the object above the minimal height."""
-    object: RigidObject = env.scene[object_cfg.name]
-    asset: Articulation = env.scene[robot_cfg.name]
-
-    robot: RigidObject = env.scene[robot_cfg.name]
-    command = env.command_manager.get_command(command_name)
-
-    # compute the distance between object and disc_pose
-    des_pos_b = command[:, :3]
-    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
-    des_pos_w[:, 2] += delta_z
-
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
-    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (distance < distance_threshold)
-
-    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-
-    # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
-    # default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-    # print("current_angle is ", current_angle[:,6])
-    # print("default_angle is ", default_angle[:,6])
-    # print("angle[:,6] is ", angle[:,6])
-    # print("angle[:,7] is ", angle[:,7])
-    # print("condition is ", condition)
-    # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
-
-    return condition * (0.0085 - torch.abs(angle[:,6]))
-
-
-
 def object_ee_distance(
     env: ManagerBasedRLEnv,
     std: float,
@@ -179,6 +140,49 @@ def object_goal_distance_six_joint(
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
     #return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0)
     return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0) 
+
+
+def release_reward(env: ManagerBasedRLEnv, 
+
+                     delta_z: float,
+                     distance_threshold: float,
+                     command_name: str,
+                     
+                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
+    """Reward the agent for lifting the object above the minimal height."""
+    object: RigidObject = env.scene[object_cfg.name]
+    asset: Articulation = env.scene[robot_cfg.name]
+
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
+
+    # compute the distance between object and disc_pose
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
+
+    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (distance < distance_threshold)
+
+    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+
+    # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
+    # default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+    # print("current_angle is ", current_angle[:,6])
+    # print("default_angle is ", default_angle[:,6])
+    # print("angle[:,6] is ", angle[:,6])
+    # print("angle[:,7] is ", angle[:,7])
+    # print("condition is ", condition)
+    # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
+
+    return condition * (0.0085 - torch.abs(angle[:,6]))
+
+
+
+
+
 
 
 def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
