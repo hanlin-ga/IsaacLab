@@ -197,6 +197,8 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # check if contact force is above threshold
     net_contact_forces = contact_sensor.data.net_forces_w_history
     is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+    # print("net_contact_forces is ", net_contact_forces)
+    # print("torch.sum(is_contact, dim=1) is ", torch.sum(is_contact, dim=1))
 
     # print("ID is ", ID)
     # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))

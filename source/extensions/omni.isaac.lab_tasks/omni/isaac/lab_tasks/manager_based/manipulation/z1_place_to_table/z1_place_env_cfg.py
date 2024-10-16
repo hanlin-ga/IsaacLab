@@ -160,7 +160,7 @@ class CommandsCfg:
         resampling_time_range=(5.0, 5.0),
         debug_vis=True,
         ranges=mdp.UniformDiskPoseCommandCfg.Ranges(
-            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(0.0, 0.0), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
+            pos_x=(0.4, 0.6), pos_y=(-0.25, 0.25), pos_z=(-0.02, -0.02), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
         ),
     )
 
@@ -220,18 +220,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.07, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "delta_z": 0.07, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.09, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "delta_z": 0.07, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.09, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=5.0,
     )
 
