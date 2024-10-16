@@ -75,14 +75,14 @@ def release_reward(env: ManagerBasedRLEnv,
 
     current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
     default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-    print("current_angle is ", current_angle[:,6])
-    print("default_angle is ", default_angle[:,6])
-    print("angle[:,6] is ", angle[:,6])
-    print("angle[:,7] is ", angle[:,7])
-    print("condition is ", condition)
-    print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
+    # print("current_angle is ", current_angle[:,6])
+    # print("default_angle is ", default_angle[:,6])
+    # print("angle[:,6] is ", angle[:,6])
+    # print("angle[:,7] is ", angle[:,7])
+    # print("condition is ", condition)
+    # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
 
-    return condition * (0.04 - torch.abs(angle[:,6]) - 0.0316)
+    return condition * (0.0085 - torch.abs(angle[:,6]))
 
 
 
@@ -209,14 +209,68 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # print("net_contact_forces is ", net_contact_forces)
     # print("torch.sum(is_contact, dim=1) is ", torch.sum(is_contact, dim=1))
 
-    print("*"*100)
-    print("ID is ", ID)
-    print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])
-    print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
+    # print("*"*100)
+    # print("ID is ", ID)
+    # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])
+    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)
 
+def undesired_contacts_xy(env: ManagerBasedRLEnv, 
+                          force_threshold: float,
+                          sensor_cfg: SceneEntityCfg, 
+                          ID: String,
+                          delta_z: float,
+                          std: float,
+    
+                          distance_threshold: float,
+                          command_name: str,
+
+                          robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                          object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
+    """Penalize undesired contacts as the number of violations that are above a threshold."""
+
+    robot: RigidObject = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    asset: Articulation = env.scene[robot_cfg.name]
+
+    command = env.command_manager.get_command(command_name)
+    # compute the disc_pose in the world frame
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
+
+    # calculate the distance between object and disc_pose in x y z
+    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    condition = (distance < distance_threshold)
+
+    # extract the used quantities (to enable type-hinting)
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # check if contact force is above threshold
+    net_contact_forces = contact_sensor.data.net_forces_w_history
+    net_contact_forces_body_ids = net_contact_forces[:, :, sensor_cfg.body_ids]   # torch.Size([1, 3, 1, 3])
+    contact_force_xy = torch.norm(net_contact_forces_body_ids[:, :, :, :2], dim=-1)
+    max_contact = torch.max(contact_force_xy, dim=1)[0].squeeze(-1)
+
+    # print("*"*100)
+    # print("condition is ", condition)
+    # print("contact_force_xy is ", contact_force_xy)
+    # print("xy force reward is ", condition * (1-torch.tanh(max_contact / std)))
+    # print("max_contact is ", max_contact)
+    # is_contact = torch.max(torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1), dim=1)[0] > threshold
+    # print("net_contact_forces is ", net_contact_forces)
+    # print("torch.sum(is_contact, dim=1) is ", torch.sum(is_contact, dim=1))
+
+    # print("*"*100)
+    # print("ID is ", ID)
+    # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])
+    # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
+    # print("net_contact_forces_body_ids shape is ", net_contact_forces_body_ids.shape)
+    # print("contact_force_xy is ", contact_force_xy)
+
+    # sum over contacts for each environment
+    return condition*(1-torch.tanh(max_contact/std))
 
 def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
     """Penalize joint positions that deviate from the default one."""

@@ -255,9 +255,9 @@ class RewardsCfg:
 
 
     object_undesired_contacts = RewTerm(
-        func=mdp.undesired_contacts_id,
-        weight=-1.0,
-        params={"sensor_cfg": SceneEntityCfg("object_contact_forces"), "threshold": 50, "ID": "object"},
+        func=mdp.undesired_contacts_xy,
+        weight=1.0,
+        params={"delta_z": 0.09, "distance_threshold": 0.03, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
     )
     release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=100.0)
 
