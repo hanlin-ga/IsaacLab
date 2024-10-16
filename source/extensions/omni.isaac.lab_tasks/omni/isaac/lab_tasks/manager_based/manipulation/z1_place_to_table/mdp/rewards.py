@@ -142,66 +142,7 @@ def object_goal_distance_six_joint(
     return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0) 
 
 
-def release_reward(env: ManagerBasedRLEnv, 
 
-                     delta_z: float,
-                     distance_threshold: float,
-                     command_name: str,
-                     
-                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
-                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
-    """Reward the agent for lifting the object above the minimal height."""
-    object: RigidObject = env.scene[object_cfg.name]
-    asset: Articulation = env.scene[robot_cfg.name]
-
-    robot: RigidObject = env.scene[robot_cfg.name]
-    command = env.command_manager.get_command(command_name)
-
-    # compute the distance between object and disc_pose
-    des_pos_b = command[:, :3]
-    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
-    des_pos_w[:, 2] += delta_z
-
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
-    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (distance < distance_threshold)
-
-    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-
-    # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
-    # default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
-    # print("current_angle is ", current_angle[:,6])
-    # print("default_angle is ", default_angle[:,6])
-    # print("angle[:,6] is ", angle[:,6])
-    # print("angle[:,7] is ", angle[:,7])
-    # print("condition is ", condition)
-    # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
-
-    return condition * (0.0085 - torch.abs(angle[:,6]))
-
-
-
-
-
-
-
-def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
-    """Penalize joint positions that deviate from the default one."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    # compute out of limits constraints
-    # print("asset_cfg.joint_ids is ", asset_cfg.joint_ids)   # asset_cfg.joint_ids is  slice(None, None, None)
-    # print("asset.data.default_joint_pos shape is ", asset.data.default_joint_pos.shape) # asset.data.default_joint_pos shape is  torch.Size([1000, 8])
-    # angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
-    # angle = asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5]
-    vel = asset.data.joint_vel[:, 5]
-    # print("last angle 5 is ", asset.data.joint_pos[:, 5])
-    # print("last angle 6 is ", asset.data.joint_pos[:, 6])
-    # print("last angle 7 is ", asset.data.joint_pos[:, 7])
-    # print("asset.data.default_joint_pos is ", asset.data.default_joint_pos[:, 5])
-    # print("torch.sum(torch.abs(angle), dim=1) shape is ", torch.sum(torch.abs(angle), dim=1).shape)
-    # print("torch.abs(angle) shape is ", torch.abs(angle).shape)
-    return torch.abs(asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5])
 
 def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: SceneEntityCfg, ID: String) -> torch.Tensor:
     """Penalize undesired contacts as the number of violations that are above a threshold."""
@@ -276,16 +217,42 @@ def undesired_contacts_xy(env: ManagerBasedRLEnv,
     # sum over contacts for each environment
     return condition*(1-torch.tanh(max_contact/std))
 
-def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
-    """Penalize joint positions that deviate from the default one."""
-    # extract the used quantities (to enable type-hinting)
-    asset: Articulation = env.scene[asset_cfg.name]
-    # compute out of limits constraints
-    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+def release_reward(env: ManagerBasedRLEnv, 
 
-    # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
-    return torch.sum(torch.abs(angle[:,0:6]), dim=1)
+                     delta_z: float,
+                     distance_threshold: float,
+                     command_name: str,
+                     
+                     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+                     object_cfg: SceneEntityCfg = SceneEntityCfg("object")) -> torch.Tensor:
+    """Reward the agent for lifting the object above the minimal height."""
+    object: RigidObject = env.scene[object_cfg.name]
+    asset: Articulation = env.scene[robot_cfg.name]
 
+    robot: RigidObject = env.scene[robot_cfg.name]
+    command = env.command_manager.get_command(command_name)
+
+    # compute the distance between object and disc_pose
+    des_pos_b = command[:, :3]
+    des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
+    des_pos_w[:, 2] += delta_z
+
+    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition = (distance < distance_threshold)
+
+    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+
+    # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
+    # default_angle = asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+    # print("current_angle is ", current_angle[:,6])
+    # print("default_angle is ", default_angle[:,6])
+    # print("angle[:,6] is ", angle[:,6])
+    # print("angle[:,7] is ", angle[:,7])
+    # print("condition is ", condition)
+    # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
+
+    return condition * (0.0085 - torch.abs(angle[:,6]))
 
 def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
                                  object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
@@ -300,6 +267,57 @@ def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv,
     # print("orientation_diff is ", orientation_diff)
     return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
 
+
+
+
+###########################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def joint_deviation_l1_six_joints(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+
+    # print("default_joint_pos is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids] )
+    return torch.sum(torch.abs(angle[:,0:6]), dim=1)
+
+
+
+def last_joint_vel(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize joint positions that deviate from the default one."""
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    # print("asset_cfg.joint_ids is ", asset_cfg.joint_ids)   # asset_cfg.joint_ids is  slice(None, None, None)
+    # print("asset.data.default_joint_pos shape is ", asset.data.default_joint_pos.shape) # asset.data.default_joint_pos shape is  torch.Size([1000, 8])
+    # angle = asset.data.joint_pos[:, asset_cfg.joint_ids] - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    # angle = asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5]
+    vel = asset.data.joint_vel[:, 5]
+    # print("last angle 5 is ", asset.data.joint_pos[:, 5])
+    # print("last angle 6 is ", asset.data.joint_pos[:, 6])
+    # print("last angle 7 is ", asset.data.joint_pos[:, 7])
+    # print("asset.data.default_joint_pos is ", asset.data.default_joint_pos[:, 5])
+    # print("torch.sum(torch.abs(angle), dim=1) shape is ", torch.sum(torch.abs(angle), dim=1).shape)
+    # print("torch.abs(angle) shape is ", torch.abs(angle).shape)
+    return torch.abs(asset.data.joint_pos[:, 5] - asset.data.default_joint_pos[:, 5])
 
 def joint_deviation_l1_condition(env: ManagerBasedRLEnv,
                                  distance_threshold: float,
