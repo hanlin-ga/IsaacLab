@@ -60,7 +60,7 @@ def object_ee_distance(
     des_pos_w[:, 2] += delta_z
 
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
-    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
     condition = (distance > distance_threshold)
     # print("1 - torch.tanh(object_ee_distance / std)*condition is ", 1 - torch.tanh(object_ee_distance / std)*condition)
     # print("ee condition is ", condition)
