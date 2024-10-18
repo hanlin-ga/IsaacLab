@@ -134,13 +134,13 @@ def object_goal_distance_six_joint(
 
     # print("condition is ", condition)
     # print("condition1 is ", condition1)
-    print("condition2 is ", condition2)
+    # print("condition2 is ", condition2)
     # print("*"*100)
     # print("distance_xy is ", distance_xy)
     # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
     # print("asset.data.joint_pos[:, robot_cfg.joint_ids] is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
     # print("default_joint_pos is ", asset.data.default_joint_pos[:, robot_cfg.joint_ids])
-    print("angle is ", angle)
+    # print("angle is ", angle)
     # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
     # print("(object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1) is ", (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1))
     # rewarded if the object is lifted above the threshold
