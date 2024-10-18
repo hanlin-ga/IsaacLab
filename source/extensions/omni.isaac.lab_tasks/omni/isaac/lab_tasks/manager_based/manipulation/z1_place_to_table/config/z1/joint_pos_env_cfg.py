@@ -91,6 +91,25 @@ class Z1CubePlaceEnvCfg(Z1PlaceEnvCfg):
             ),
         )
 
+        self.scene.disc = RigidObjectCfg(
+            prim_path="{ENV_REGEX_NS}/Disc",
+            init_state=RigidObjectCfg.InitialStateCfg(
+                pos=[0.5, 0, 0.91], rot=[1, 0, 0, 0]
+            ),  # rot=[0.7071068, -0.7071068, 0, 0]
+            spawn=sim_utils.UsdFileCfg(
+                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/Red_disc.usd"),
+                scale=(2, 2, 2),
+                activate_contact_sensors=True,
+                rigid_props=RigidBodyPropertiesCfg(
+                    solver_position_iteration_count=16,
+                    solver_velocity_iteration_count=1,
+                    max_angular_velocity=1000.0,
+                    max_linear_velocity=1000.0,
+                    max_depenetration_velocity=5.0,
+                    disable_gravity=False,
+                ),
+            ),
+        )
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
         marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)

@@ -42,8 +42,10 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     robot: ArticulationCfg = MISSING
     # end-effector sensor: will be populated by agent env cfg
     ee_frame: FrameTransformerCfg = MISSING
-    # target object: will be populated by agent env cfg
+    # object: will be populated by agent env cfg
     object: RigidObjectCfg = MISSING
+
+    disc: RigidObjectCfg = MISSING
 
     # object: AssetBaseCfg = MISSING
 
@@ -185,11 +187,13 @@ class ObservationsCfg:
 
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
-        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
-        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
 
-        object_pose_obs = ObsTerm(func=mdp.object_pose_obs)
-        target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "disc_pose"})
+        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        object_pose = ObsTerm(func=mdp.object_pose_obs)
+
+        # target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "disc_pose"})
+        disc_position = ObsTerm(func=mdp.disc_position_in_robot_root_frame)
+
         actions = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -206,15 +210,15 @@ class EventCfg:
 
     reset_all = EventTerm(func=mdp.reset_scene_to_default, mode="reset")
 
-    # reset_object_position = EventTerm(
-    #     func=mdp.reset_root_state_uniform,
-    #     mode="reset",
-    #     params={
-    #         "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
-    #         "velocity_range": {},
-    #         "asset_cfg": SceneEntityCfg("object", body_names="Object"),
-    #     },
-    # )
+    reset_disc_position = EventTerm(
+        func=mdp.reset_root_state_uniform,
+        mode="reset",
+        params={
+            "pose_range": {"x": (-0.1, 0.1), "y": (-0.25, 0.25), "z": (0.0, 0.0)},
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("disc", body_names="Cylinder"),
+        },
+    )
 
 
 @configclass
