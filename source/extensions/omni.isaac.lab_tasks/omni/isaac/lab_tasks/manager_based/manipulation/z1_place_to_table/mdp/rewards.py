@@ -1,3 +1,4 @@
+ 
 # Copyright (c) 2022-2024, The Isaac Lab Project Developers.
 # All rights reserved.
 #
@@ -43,6 +44,7 @@ def object_is_lifted(env: ManagerBasedRLEnv,
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
     condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance < distance_threshold)
+    # print("condition is ", condition)
 
     return torch.where(condition, 1.0, 0.0) 
 
@@ -85,8 +87,9 @@ def object_ee_distance(
 
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = distance > distance_threshold
-
+    condition = (distance > distance_threshold)
+    # print("1 - torch.tanh(object_ee_distance / std)*condition is ", 1 - torch.tanh(object_ee_distance / std)*condition)
+    # print("ee condition is ", condition)
     return 1 - torch.tanh(object_ee_distance / std)*condition
 
 
@@ -127,19 +130,24 @@ def object_goal_distance_six_joint(
 
     # check if the object has arrived at the goal position. If yes, condition1 is 0
     condition1 = (distance > distance_threshold)
+    condition2 = (distance < distance_threshold)
+
+    # print("condition is ", condition)
+    # print("condition1 is ", condition1)
+    print("condition2 is ", condition2)
     # print("*"*100)
     # print("distance_xy is ", distance_xy)
     # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
     # print("asset.data.joint_pos[:, robot_cfg.joint_ids] is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
     # print("default_joint_pos is ", asset.data.default_joint_pos[:, robot_cfg.joint_ids])
-    # print("angle is ", angle)
+    print("angle is ", angle)
     # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
     # print("(object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1) is ", (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1))
     # rewarded if the object is lifted above the threshold
     # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
     #return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0)
-    return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0) 
+    return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0 - torch.abs(angle[:,6])*100.0*condition2 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.5*condition2 - torch.abs(angle[:,1])*3.0*condition2)
 
 
 
@@ -158,6 +166,7 @@ def undesired_contacts_id(env: ManagerBasedRLEnv, threshold: float, sensor_cfg: 
     # print("ID is ", ID)
     # print("net_contact_forces[:, :, sensor_cfg.body_ids] is ", net_contact_forces[:, :, sensor_cfg.body_ids])
     # print("torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1) is ", torch.norm(net_contact_forces[:, :, sensor_cfg.body_ids], dim=-1))
+    # print("torch.sum(is_contact, dim=1) is ", torch.sum(is_contact, dim=1))
 
     # sum over contacts for each environment
     return torch.sum(is_contact, dim=1)
@@ -251,8 +260,9 @@ def release_reward(env: ManagerBasedRLEnv,
     # print("angle[:,7] is ", angle[:,7])
     # print("condition is ", condition)
     # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
+    # print("condition * (0.0085 - torch.abs(angle[:,6])) is ", condition * (0.0085 - torch.abs(angle[:,6])))
 
-    return condition * (0.0085 - torch.abs(angle[:,6]))
+    return condition * (0.0085 - torch.abs(angle[:,6])) + condition * 0.1
 
 def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
                                  object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:

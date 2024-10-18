@@ -1,3 +1,4 @@
+ 
 # Copyright (c) 2022-2024, The Isaac Lab Project Developers.
 # All rights reserved.
 #
@@ -115,18 +116,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    # camera = CameraCfg(
-    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-    #     update_period=0.0333,
-    #     height=360,
-    #     width=640,
-    #     data_types=["rgb"],
-    #     # data_types=["rgb", "distance_to_image_plane"],
-    #     spawn=sim_utils.PinholeCameraCfg(
-    #         focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-    #     ),
-    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    # )
+    camera = CameraCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+        update_period=0.0333,
+        height=360,
+        width=640,
+        data_types=["rgb"],
+        # data_types=["rgb", "distance_to_image_plane"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+        ),
+        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    )
 
     # lights
     light = AssetBaseCfg(
@@ -221,18 +222,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "delta_z": 0.09, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.09, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "delta_z": 0.09, "distance_threshold": 0.03, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.09, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -255,10 +256,10 @@ class RewardsCfg:
 
     object_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_xy,
-        weight=1.0,
-        params={"delta_z": 0.09, "distance_threshold": 0.03, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
+        weight=10.0,
+        params={"delta_z": 0.09, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
     )
-    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.09, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=100.0)
+    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1000.0)
 
 
 @configclass
