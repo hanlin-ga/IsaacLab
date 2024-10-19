@@ -56,9 +56,14 @@ def object_ee_distance(
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3]
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    # print("*"*100)
+    # print("in ee_distance, before disc des_pos_w is ", des_pos_w)
     des_pos_w[:, 2] += delta_z
 
+    
+    # print("in ee_distance, disc des_pos_w is ", des_pos_w)
+    # print("in ee_distance, object pos is ",object.data.root_pos_w[:, :3] )
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
     condition = (distance > distance_threshold)
@@ -91,8 +96,14 @@ def object_is_lifted(env: ManagerBasedRLEnv,
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3]
+    
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    # print("in lifted, before disc des_pos_w is ", des_pos_w)
+    # print("in lifted, disc.data.root_pos_w[:, :3] ", disc.data.root_pos_w[:, :3])
     des_pos_w[:, 2] += delta_z
+    # print("in lifted, disc des_pos_w is ", des_pos_w)
+    # print("in lifted, disc.data.root_pos_w[:, :3] ", disc.data.root_pos_w[:, :3])
+    # print("in lifted, object pos is ",object.data.root_pos_w[:, :3] )
 
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
@@ -128,8 +139,11 @@ def object_goal_distance_six_joint(
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3]
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    # print("in six joint, before des_pos_w  is ", des_pos_w )
     des_pos_w[:, 2] += delta_z
+    # print("in six joint, des_pos_w  is ", des_pos_w )
+    # print("in six joint, object pos is ",object.data.root_pos_w[:, :3] )
 
     # calculate the distance between object and disc_pose in x y z
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
@@ -212,7 +226,7 @@ def undesired_contacts_xy(env: ManagerBasedRLEnv,
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3]
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
     des_pos_w[:, 2] += delta_z
 
     # calculate the distance between object and disc_pose in x y z
@@ -269,7 +283,7 @@ def release_reward(env: ManagerBasedRLEnv,
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3]
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
     des_pos_w[:, 2] += delta_z
 
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)

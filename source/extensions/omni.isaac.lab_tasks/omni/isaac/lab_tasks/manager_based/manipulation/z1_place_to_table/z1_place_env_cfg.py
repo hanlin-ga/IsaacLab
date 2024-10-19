@@ -226,18 +226,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 1.005, "delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "delta_z": 0.09, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.094, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "delta_z": 0.09, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.094, "distance_threshold": 0.05, "minimal_height": 1.005, "command_name": "disc_pose"},
         weight=5.0,
     )
 
@@ -261,9 +261,9 @@ class RewardsCfg:
     object_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_xy,
         weight=10.0,
-        params={"delta_z": 0.09, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
+        params={"delta_z": 0.094, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
     )
-    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.09, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1000.0)
+    release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1000.0)
 
 
 @configclass
