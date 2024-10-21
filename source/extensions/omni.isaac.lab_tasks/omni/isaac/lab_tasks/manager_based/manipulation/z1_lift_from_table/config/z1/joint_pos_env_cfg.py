@@ -66,7 +66,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             init_state=RigidObjectCfg.InitialStateCfg(
                 pos=[0.5, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]  # this is for the mustard, bleach, YCB dataset
                 # pos=[0.5, 0, 1], rot=[0.7071068, 0.7071068, 0, 0]  # this is for the Soda Can
-                # pos=[0.5, 0, 1], rot=[1, 0, 0, 0]  # this is for the cup
+                # pos=[0.5, 0, 1], rot=[1, 0, 0, 0]  # this is for cup
             ),  
             spawn=UsdFileCfg(
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/soda_can/Soda_Can.usd"),   # minimum height 0.9575
