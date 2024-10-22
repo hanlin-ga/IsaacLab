@@ -16,7 +16,7 @@ Reference: https://github.com/frankaemika/franka_ros
 import os
 
 import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.actuators import ImplicitActuatorCfg
+from omni.isaac.lab.actuators import ImplicitActuatorCfg, DCMotorCfg
 from omni.isaac.lab.assets.articulation import ArticulationCfg
 from omni.isaac.lab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
@@ -53,42 +53,42 @@ Z1_CFG = ArticulationCfg(
         },
     ),
     actuators={
-        "joint1": ImplicitActuatorCfg(
+        "joint1": DCMotorCfg(
             joint_names_expr=["joint[1]"],
             effort_limit=30.0,
             velocity_limit=3.14,
             stiffness=251.0,
             damping=25.8,
         ),
-        "joint2": ImplicitActuatorCfg(
+        "joint2": DCMotorCfg(
             joint_names_expr=["joint[2]"],
             effort_limit=60.0,
             velocity_limit=3.14,
             stiffness=501.0,
             damping=50.1,
         ),
-        "joint3": ImplicitActuatorCfg(
+        "joint3": DCMotorCfg(
             joint_names_expr=["joint[3]"],
             effort_limit=30.0,
             velocity_limit=3.14,
             stiffness=251.0,
             damping=25.1,
         ),
-        "joint4": ImplicitActuatorCfg(
+        "joint4": DCMotorCfg(
             joint_names_expr=["joint[4]"],
             effort_limit=30.0,
             velocity_limit=3.14,
             stiffness=398.0,
             damping=39.8,
         ),
-        "joint5": ImplicitActuatorCfg(
+        "joint5": DCMotorCfg(
             joint_names_expr=["joint[5]"],
             effort_limit=30.0,
             velocity_limit=3.14,
             stiffness=631.0,
             damping=63.1,
         ),
-        "joint6": ImplicitActuatorCfg(
+        "joint6": DCMotorCfg(
             joint_names_expr=["joint[6]"],
             effort_limit=30.0,
             velocity_limit=3.14,

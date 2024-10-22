@@ -30,7 +30,7 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         # post init of parent
         super().__post_init__()
 
-        # Set Franka as robot
+        # Set z1 as robot
         self.scene.robot = Z1_CFG.replace(
             prim_path="{ENV_REGEX_NS}/Robot",
             init_state=ArticulationCfg.InitialStateCfg(
