@@ -181,8 +181,12 @@ def joint_vel_limits_reward(
         torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids])
         - asset.data.soft_joint_vel_limits[:, asset_cfg.joint_ids] * soft_ratio
     )
-    print("asset.data.soft_joint_vel_limits is ", asset.data.soft_joint_vel_limits)
+    
     # clip to max error = 1 rad/s per joint to avoid huge penalties
     out_of_limits = out_of_limits.clip_(min=0.0, max=1.0)
+    # print("*"*100)
+    # print("torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]) is ", torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]))
+    # print("asset.data.soft_joint_vel_limits is ", asset.data.soft_joint_vel_limits)
+    # print("torch.sum(out_of_limits, dim=1) is ", torch.sum(out_of_limits, dim=1))
     return torch.sum(out_of_limits, dim=1)
 

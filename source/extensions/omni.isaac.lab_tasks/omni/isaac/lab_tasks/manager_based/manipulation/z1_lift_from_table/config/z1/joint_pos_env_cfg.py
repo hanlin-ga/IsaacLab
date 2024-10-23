@@ -64,25 +64,25 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
         self.scene.object = RigidObjectCfg(
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
-                pos=[0.5, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]  # this is for the mustard, bleach, YCB dataset
-                # pos=[0.5, 0, 1], rot=[0.7071068, 0.7071068, 0, 0]  # this is for the Soda Can
+                # pos=[0.5, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]  # this is for the mustard, bleach, YCB dataset
+                pos=[0.5, 0, 1], rot=[0.7071068, 0.7071068, 0, 0]  # this is for the Soda Can
                 # pos=[0.5, 0, 1], rot=[1, 0, 0, 0]  # this is for cup
             ),  
             spawn=UsdFileCfg(
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/soda_can/Soda_Can.usd"),   # minimum height 0.9575
+                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/soda_can/Soda_Can.usd"),   # minimum height 0.9575
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/Cup/Cup.usd"),    # minimum height 0.897
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),    # minimum height 1.005
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/003_cracker_box.usd"),
-                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),   # minimum height 1.007
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/021_bleach_cleanser.usd"),   # minimum height 1.007
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/008_pudding_box.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/035_power_drill.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/010_potted_meat_can.usd"),
                 
                 # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(0.8, 0.8, 0.8),
-                # scale=(1, 1, 1),
+                # scale=(0.8, 0.8, 0.8),
+                scale=(1, 1, 1),
                 rigid_props=RigidBodyPropertiesCfg(
                     solver_position_iteration_count=16,
                     solver_velocity_iteration_count=1,
