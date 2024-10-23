@@ -22,7 +22,7 @@ from pxr import PhysxSchema, UsdPhysics
 import omni.isaac.lab.sim as sim_utils
 import omni.isaac.lab.utils.math as math_utils
 import omni.isaac.lab.utils.string as string_utils
-from omni.isaac.lab.actuators import ActuatorBase, ActuatorBaseCfg, ImplicitActuator
+from omni.isaac.lab.actuators import ActuatorBase, ActuatorBaseCfg, ImplicitActuator, ClippedImplicitActuator
 
 from ..asset_base import AssetBase
 from .articulation_data import ArticulationData
@@ -1143,6 +1143,14 @@ class Articulation(AssetBase):
             self.actuators[actuator_name] = actuator
             # set the passed gains and limits into the simulation
             if isinstance(actuator, ImplicitActuator):
+                self._has_implicit_actuators = True
+                # the gains and limits are set into the simulation since actuator model is implicit
+                self.write_joint_stiffness_to_sim(actuator.stiffness, joint_ids=actuator.joint_indices)
+                self.write_joint_damping_to_sim(actuator.damping, joint_ids=actuator.joint_indices)
+                self.write_joint_effort_limit_to_sim(actuator.effort_limit, joint_ids=actuator.joint_indices)
+                self.write_joint_armature_to_sim(actuator.armature, joint_ids=actuator.joint_indices)
+                self.write_joint_friction_to_sim(actuator.friction, joint_ids=actuator.joint_indices)
+            elif isinstance(actuator, ClippedImplicitActuator):
                 self._has_implicit_actuators = True
                 # the gains and limits are set into the simulation since actuator model is implicit
                 self.write_joint_stiffness_to_sim(actuator.stiffness, joint_ids=actuator.joint_indices)
