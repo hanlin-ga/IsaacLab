@@ -162,3 +162,27 @@ def end_effector_orientation_diff_rew(
     # print("quat_error_magnitude(ee_quat_w, default_quat_w) is ", quat_error_magnitude(ee_quat_w, default_quat_w))
 
     return quat_error_magnitude_y(ee_quat_w, default_quat_w)
+
+
+def joint_vel_limits_reward(
+    env: ManagerBasedRLEnv, soft_ratio: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Penalize joint velocities if they cross the soft limits.
+
+    This is computed as a sum of the absolute value of the difference between the joint velocity and the soft limits.
+
+    Args:
+        soft_ratio: The ratio of the soft limits to be used.
+    """
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+    # compute out of limits constraints
+    out_of_limits = (
+        torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids])
+        - asset.data.soft_joint_vel_limits[:, asset_cfg.joint_ids] * soft_ratio
+    )
+    print("asset.data.soft_joint_vel_limits is ", asset.data.soft_joint_vel_limits)
+    # clip to max error = 1 rad/s per joint to avoid huge penalties
+    out_of_limits = out_of_limits.clip_(min=0.0, max=1.0)
+    return torch.sum(out_of_limits, dim=1)
+
