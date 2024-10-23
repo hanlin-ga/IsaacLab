@@ -99,7 +99,7 @@ class ClippedImplicitActuator(ActuatorBase):
     def __init__(self, cfg: ClippedImplicitActuatorCfg, *args, **kwargs):
         super().__init__(cfg, *args, **kwargs)
         # parse configuration
-        self._saturation_effort = self.cfg.effort_limit
+        self._saturation_effort = self.effort_limit
         # prepare joint vel buffer for max effort computation
         self._joint_vel = torch.zeros_like(self.computed_effort)
         # create buffer for zeros effort
