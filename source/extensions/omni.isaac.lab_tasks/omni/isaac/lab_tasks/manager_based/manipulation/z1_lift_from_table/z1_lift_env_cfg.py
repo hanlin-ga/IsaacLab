@@ -232,7 +232,7 @@ class RewardsCfg:
     )
 
     joint_vel_limits = RewTerm(
-        func=mdp.joint_vel_limits_reward,
+        func=mdp.joint_vel_limits_reward_condition,
         weight=-1,
         params={"soft_ratio": 1.0, "asset_cfg": SceneEntityCfg("robot")},
     )

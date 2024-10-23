@@ -190,3 +190,40 @@ def joint_vel_limits_reward(
     # print("torch.sum(out_of_limits, dim=1) is ", torch.sum(out_of_limits, dim=1))
     return torch.sum(out_of_limits, dim=1)
 
+
+
+def joint_vel_limits_reward_condition(
+    env: ManagerBasedRLEnv, soft_ratio: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Penalize joint velocities if they cross the soft limits.
+
+    This is computed as a sum of the absolute value of the difference between the joint velocity and the soft limits.
+
+    Args:
+        soft_ratio: The ratio of the soft limits to be used.
+    """
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[asset_cfg.name]
+
+    # Calculate the condition for velocities exceeding the limit
+    vel_exceeding_condition = torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]) >= asset.data.soft_joint_vel_limits[:, asset_cfg.joint_ids] * soft_ratio
+
+
+    # Calculate the out_of_limits values
+    out_of_limits = torch.where(
+        vel_exceeding_condition,
+        torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]) - asset.data.soft_joint_vel_limits[:, asset_cfg.joint_ids] * soft_ratio,
+        torch.zeros_like(asset.data.joint_vel[:, asset_cfg.joint_ids])  # Set to 0 when the condition is not met
+    )
+
+    # print("*"*100)
+    # print("torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]) is ", torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]))
+    # print("asset.data.soft_joint_vel_limits is ", asset.data.soft_joint_vel_limits)
+    # print("torch.sum(out_of_limits, dim=1) is ", torch.sum(out_of_limits, dim=1))
+    # print("before out_of_limits is ", out_of_limits)
+    # clip to max error = 1 rad/s per joint to avoid huge penalties
+    out_of_limits = out_of_limits.clip_(min=0.0, max=2.0)
+    # print("after out_of_limits is ", out_of_limits)
+    # print("*"*100)
+
+    return torch.sum(out_of_limits, dim=1)
