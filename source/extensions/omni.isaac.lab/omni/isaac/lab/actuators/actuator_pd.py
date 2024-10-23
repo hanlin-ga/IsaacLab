@@ -22,6 +22,7 @@ if TYPE_CHECKING:
         IdealPDActuatorCfg,
         ImplicitActuatorCfg,
         RemotizedPDActuatorCfg,
+        ClippedImplicitActuatorCfg
     )
 
 
@@ -72,6 +73,69 @@ class ImplicitActuator(ActuatorBase):
         self.applied_effort = self._clip_effort(self.computed_effort)
         return control_action
 
+
+class ClippedImplicitActuator(ActuatorBase):
+    """Implicit actuator model that is handled by the simulation.
+
+    This performs a similar function as the :class:`IdealPDActuator` class. However, the PD control is handled
+    implicitly by the simulation which performs continuous-time integration of the PD control law. This is
+    generally more accurate than the explicit PD control law used in :class:`IdealPDActuator` when the simulation
+    time-step is large.
+
+    .. note::
+
+        The articulation class sets the stiffness and damping parameters from the configuration into the simulation.
+        Thus, the parameters are not used in this class.
+
+    .. caution::
+
+        The class is only provided for consistency with the other actuator models. It does not implement any
+        functionality and should not be used. All values should be set to the simulation directly.
+    """
+
+    cfg: ClippedImplicitActuatorCfg
+    """The configuration for the actuator model."""
+
+    def __init__(self, cfg: ClippedImplicitActuatorCfg, *args, **kwargs):
+        super().__init__(cfg, *args, **kwargs)
+        # parse configuration
+        self._saturation_effort = self.cfg.effort_limit
+        # prepare joint vel buffer for max effort computation
+        self._joint_vel = torch.zeros_like(self.computed_effort)
+        # create buffer for zeros effort
+        self._zeros_effort = torch.zeros_like(self.computed_effort)
+    """
+    Operations.
+    """
+
+    def reset(self, *args, **kwargs):
+        # This is a no-op. There is no state to reset for implicit actuators.
+        pass
+
+    def compute(
+        self, control_action: ArticulationActions, joint_pos: torch.Tensor, joint_vel: torch.Tensor
+    ) -> ArticulationActions:
+        self._joint_vel[:] = joint_vel
+        """Compute the aproximmate torques for the actuated joint (physX does not compute this explicitly)."""
+        # store approximate torques for reward computation
+        error_pos = control_action.joint_positions - joint_pos
+        error_vel = control_action.joint_velocities - joint_vel
+        self.computed_effort = self.stiffness * error_pos + self.damping * error_vel + control_action.joint_efforts
+        # clip the torques based on the motor limits
+        self.applied_effort = self.clip_effort(self.computed_effort)
+        return control_action
+
+    def clip_effort(self, effort: torch.Tensor) -> torch.Tensor:
+        # compute torque limits
+        # -- max limit
+        max_effort = self._saturation_effort * (1.0 - self._joint_vel / self.velocity_limit)
+        max_effort = torch.clip(max_effort, min=self._zeros_effort, max=self.effort_limit)
+        # -- min limit
+        min_effort = self._saturation_effort * (-1.0 - self._joint_vel / self.velocity_limit)
+        min_effort = torch.clip(min_effort, min=-self.effort_limit, max=self._zeros_effort)
+
+        # clip the torques based on the motor limits
+        return torch.clip(effort, min=min_effort, max=max_effort)
 
 """
 Explicit Actuator Models.

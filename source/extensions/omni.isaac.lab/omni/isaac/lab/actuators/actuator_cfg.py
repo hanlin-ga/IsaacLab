@@ -84,6 +84,15 @@ class ImplicitActuatorCfg(ActuatorBaseCfg):
     class_type: type = actuator_pd.ImplicitActuator
 
 
+@configclass
+class ClippedImplicitActuatorCfg(ActuatorBaseCfg):
+    """Configuration for an implicit actuator.
+
+    Note:
+        The PD control is handled implicitly by the simulation.
+    """
+
+    class_type: type = actuator_pd.ClippedImplicitActuator
 """
 Explicit Actuator Models.
 """
