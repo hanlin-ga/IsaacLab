@@ -155,6 +155,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         Returns:
             A tuple containing the observations, rewards, resets (terminated and truncated) and extras.
         """
+        # clip the action to be the range of the action space
+        action = self.clip_action(action)
+        
         # process actions
         self.action_manager.process_action(action.to(self.device))
 
@@ -447,3 +450,25 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
 
         # reset the episode length buffer
         self.episode_length_buf[env_ids] = 0
+
+    def clip_action(self, action: torch.Tensor) -> torch.Tensor:
+        """Clip the action to the action space.
+
+        Args:
+        action: The action to clip.
+
+        Returns:
+        The clipped action.
+        """
+        device = action.device
+        action_lower_bound = torch.tensor([[-2.6180,  0.0000, -2.8798, -1.5184, -1.3439, -0.1745]], device=device)
+        action_upper_bound = torch.tensor([[2.6180, 2.9671, 0.0000, 1.5184, 1.3439, 0.1745]], device=device)
+        default_action = torch.tensor([0.0000,  0.8000, -0.7000,  0.2000,  0.0000,  0.0000], device=device)
+
+        new_action_lower_bound = (action_lower_bound - default_action) * 2
+        new_action_upper_bound = (action_upper_bound - default_action) * 2
+
+        # Clip only the first six elements of the action
+        clipped_action = torch.clip(action[:, :6], new_action_lower_bound, new_action_upper_bound)
+        # Concatenate the clipped first six elements with the unchanged last two elements
+        return torch.cat((clipped_action, action[:, 6:]), dim=1)

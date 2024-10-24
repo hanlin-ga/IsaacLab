@@ -96,6 +96,8 @@ def object_goal_distance_six_joint(
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+
+    # print("current joint angle is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
     # print("angle is ", angle)
     # print("default_joint_pos is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
     # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
@@ -204,7 +206,7 @@ def joint_vel_limits_reward_condition(
     """
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
-
+    # print("asset.data.joint_vel[:, asset_cfg.joint_ids] is ", asset.data.joint_vel[:, asset_cfg.joint_ids])
     # Calculate the condition for velocities exceeding the limit
     vel_exceeding_condition = torch.abs(asset.data.joint_vel[:, asset_cfg.joint_ids]) >= asset.data.soft_joint_vel_limits[:, asset_cfg.joint_ids] * soft_ratio
 
@@ -225,5 +227,8 @@ def joint_vel_limits_reward_condition(
     out_of_limits = out_of_limits.clip_(min=0.0, max=2.0)
     # print("after out_of_limits is ", out_of_limits)
     # print("*"*100)
+    # print("asset.data.soft_joint_pos_limits[:, asset_cfg.joint_ids, 0] is ", asset.data.soft_joint_pos_limits[:, asset_cfg.joint_ids, 0])
+    # print("asset.data.soft_joint_pos_limits[:, asset_cfg.joint_ids, 1] is ", asset.data.soft_joint_pos_limits[:, asset_cfg.joint_ids, 1])
+    # print("asset.data.default_joint_pos[:, asset_cfg.joint_ids] is ", asset.data.default_joint_pos[:, asset_cfg.joint_ids])
 
     return torch.sum(out_of_limits, dim=1)
