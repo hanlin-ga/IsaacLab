@@ -126,6 +126,10 @@ class ClippedImplicitActuator(ActuatorBase):
         return control_action
 
     def clip_effort(self, effort: torch.Tensor) -> torch.Tensor:
+        # clip the joint velocity
+        self._joint_vel = torch.clip(self._joint_vel, min=-self.velocity_limit, max=self.velocity_limit)
+        if torch.any(torch.abs(self._joint_vel) > self.velocity_limit):
+            print("Joint velocity is out of bounds")
         # compute torque limits
         # -- max limit
         max_effort = self._saturation_effort * (1.0 - self._joint_vel / self.velocity_limit)
@@ -136,6 +140,7 @@ class ClippedImplicitActuator(ActuatorBase):
 
         # clip the torques based on the motor limits
         return torch.clip(effort, min=min_effort, max=max_effort)
+    
 
 """
 Explicit Actuator Models.

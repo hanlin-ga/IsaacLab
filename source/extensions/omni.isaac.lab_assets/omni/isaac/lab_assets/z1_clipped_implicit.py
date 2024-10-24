@@ -95,7 +95,7 @@ Z1_CFG = ArticulationCfg(
             stiffness=631.0,
             damping=63.0,
         ),
-        "z1_hand": ImplicitActuatorCfg(  # range[0, 0.04]
+        "z1_hand": ClippedImplicitActuatorCfg(  # range[0, 0.04]
             joint_names_expr=["finger_.*"],
             effort_limit=100,
             velocity_limit=100,
