@@ -25,6 +25,7 @@ from omni.isaac.lab.envs import DirectRLEnv, ManagerBasedRLEnv
 
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
+import time
 
 class RslRlVecEnvWrapper(VecEnv):
     """Wraps around Isaac Lab environment for RSL-RL library
@@ -89,6 +90,9 @@ class RslRlVecEnvWrapper(VecEnv):
             self.num_privileged_obs = 0
         # reset at the start since the RSL-RL runner does not call reset
         self.env.reset()
+
+        # Initialize the last terminated time to None
+        self.last_terminated_time = None
 
     def __str__(self):
         """Returns the wrapper name and the :attr:`env` representation string."""
@@ -194,6 +198,16 @@ class RslRlVecEnvWrapper(VecEnv):
         # ee_pos_source, ee_quat_source = self.obtain_cam_pos()
         # print("ee_pos_source : ", ee_pos_source[0, :])
         # print("ee_quat_source : ", ee_quat_source[0, :])
+
+        # Timer logic for measuring the time between terminated events
+        current_time = time.time()  # Get the current time
+        
+        if terminated.any():  # If any environment is terminated
+            if self.last_terminated_time is not None:
+                time_difference = current_time - self.last_terminated_time
+                # print(f"Time since last termination: {time_difference} seconds")
+            # Update the last terminated time to the current time
+            self.last_terminated_time = current_time
 
         # return the step information
         return obs, rew, dones, extras
