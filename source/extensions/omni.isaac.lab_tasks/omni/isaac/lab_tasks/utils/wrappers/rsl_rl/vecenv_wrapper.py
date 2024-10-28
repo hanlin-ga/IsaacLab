@@ -93,6 +93,7 @@ class RslRlVecEnvWrapper(VecEnv):
 
         # Initialize the last terminated time to None
         self.last_terminated_time = None
+        self.step_counter = 0
 
     def __str__(self):
         """Returns the wrapper name and the :attr:`env` representation string."""
@@ -181,6 +182,7 @@ class RslRlVecEnvWrapper(VecEnv):
     def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
+        self.step_counter += 1
         # print("terminated : ", terminated)
         # print("truncated : ", truncated)  
         # compute dones for compatibility with RSL-RL
@@ -206,8 +208,10 @@ class RslRlVecEnvWrapper(VecEnv):
             if self.last_terminated_time is not None:
                 time_difference = current_time - self.last_terminated_time
                 # print(f"Time since last termination: {time_difference} seconds")
+                print(f"Time since last termination: {self.step_counter*0.01} seconds")
             # Update the last terminated time to the current time
             self.last_terminated_time = current_time
+            self.step_counter = 0
 
         # return the step information
         return obs, rew, dones, extras
