@@ -208,7 +208,7 @@ class RslRlVecEnvWrapper(VecEnv):
             if self.last_terminated_time is not None:
                 time_difference = current_time - self.last_terminated_time
                 # print(f"Time since last termination: {time_difference} seconds")
-                print(f"Time since last termination: {self.step_counter*0.01} seconds")
+                # print(f"Time since last termination: {self.step_counter*0.01} seconds")
             # Update the last terminated time to the current time
             self.last_terminated_time = current_time
             self.step_counter = 0

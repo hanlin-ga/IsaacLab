@@ -208,17 +208,17 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.897}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9575}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "minimal_height": 0.897, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.9575, "command_name": "object_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "minimal_height": 0.897, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.9575, "command_name": "object_pose"},
         weight=5.0,
     )
 
@@ -259,9 +259,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.005, "command_name": "object_pose"}
-    )
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.005, "command_name": "object_pose"}
+    # )
 
 @configclass
 class CurriculumCfg:
