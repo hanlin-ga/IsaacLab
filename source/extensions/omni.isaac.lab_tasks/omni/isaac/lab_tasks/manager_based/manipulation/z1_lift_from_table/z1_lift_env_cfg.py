@@ -231,11 +231,11 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot")},
     )
 
-    joint_vel_limits = RewTerm(
-        func=mdp.joint_vel_limits_reward_condition,
-        weight=-0.1,
-        params={"soft_ratio": 0.25, "asset_cfg": SceneEntityCfg("robot")},
-    )
+    # joint_vel_limits = RewTerm(
+    #     func=mdp.joint_vel_limits_reward_condition,
+    #     weight=-0.1,
+    #     params={"soft_ratio": 0.25, "asset_cfg": SceneEntityCfg("robot")},
+    # )
 
 
     cabinet_sektion_undesired_contacts = RewTerm(
