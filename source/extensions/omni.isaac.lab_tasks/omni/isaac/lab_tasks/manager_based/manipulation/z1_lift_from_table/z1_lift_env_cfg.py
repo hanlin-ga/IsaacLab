@@ -237,13 +237,14 @@ class RewardsCfg:
     #     params={"soft_ratio": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     # )
 
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
 
     cabinet_sektion_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 30, "ID": "cabinet_sektion"},
     )
-
+    
     # This reward is designed for bleach object out of the camera scene problem
     # object_goal_orien_diff = RewTerm(func=mdp.end_effector_orientation_diff_rew, weight=-1, params={"default_quat": [0.0268,  0.9899,  0.0361, -0.1343]})
 
