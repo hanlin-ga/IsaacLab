@@ -65,12 +65,12 @@ class Z1CubeLiftEnvCfg(Z1LiftEnvCfg):
             prim_path="{ENV_REGEX_NS}/Object",
             init_state=RigidObjectCfg.InitialStateCfg(
                 # pos=[0.5, 0, 1], rot=[0.7071068, -0.7071068, 0, 0]  # this is for the mustard, bleach, YCB dataset
-                pos=[0.5, 0, 1], rot=[0.7071068, 0.7071068, 0, 0]  # this is for the Soda Can
-                # pos=[0.5, 0, 1], rot=[1, 0, 0, 0]  # this is for cup
+                # pos=[0.5, 0, 1], rot=[0.7071068, 0.7071068, 0, 0]  # this is for the Soda Can
+                pos=[0.5, 0, 1], rot=[1, 0, 0, 0]  # this is for cup
             ),  
             spawn=UsdFileCfg(
-                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/soda_can/Soda_Can.usd"),   # minimum height 0.9575
-                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/Cup/Cup.usd"),    # minimum height 0.897
+                # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/soda_can/Soda_Can.usd"),   # minimum height 0.9575
+                usd_path=os.path.join(os.path.expanduser("~"), "Downloads/GA_dataset/Cup/Cup.usd"),    # minimum height 0.897
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/006_mustard_bottle.usd"),    # minimum height 1.005
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/005_tomato_soup_can.usd"),
                 # usd_path=os.path.join(os.path.expanduser("~"), "Downloads/YCB/Axis_Aligned/004_sugar_box.usd"),
