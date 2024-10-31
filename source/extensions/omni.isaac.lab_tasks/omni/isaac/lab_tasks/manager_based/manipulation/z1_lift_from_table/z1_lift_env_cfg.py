@@ -259,9 +259,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    # object_arrive = DoneTerm(
-    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.01, "command_name": "object_pose"}
-    # )
+    object_arrive = DoneTerm(
+        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.005, "command_name": "object_pose"}
+    )
 
 @configclass
 class CurriculumCfg:
@@ -314,7 +314,7 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 10.0
+        self.episode_length_s = 30.0
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
