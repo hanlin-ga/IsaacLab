@@ -56,20 +56,20 @@ def object_ee_distance(
     # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
-    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    # des_pos_w = disc.data.root_pos_w[:, :3].clone()
     # print("*"*100)
     # print("in ee_distance, before disc des_pos_w is ", des_pos_w)
-    des_pos_w[:, 2] += delta_z
+    # des_pos_w[:, 2] += delta_z
 
     
     # print("in ee_distance, disc des_pos_w is ", des_pos_w)
     # print("in ee_distance, object pos is ",object.data.root_pos_w[:, :3] )
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    # distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (distance > distance_threshold)
+    # condition = (distance > distance_threshold)
     # print("1 - torch.tanh(object_ee_distance / std)*condition is ", 1 - torch.tanh(object_ee_distance / std)*condition)
     # print("ee condition is ", condition)
-    return 1 - torch.tanh(object_ee_distance / std)*condition
+    return 1 - torch.tanh(object_ee_distance / std)
 
 
 def object_is_lifted(env: ManagerBasedRLEnv, 
@@ -97,17 +97,18 @@ def object_is_lifted(env: ManagerBasedRLEnv,
 
     # this is the disc position in the world frame
     
-    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    # des_pos_w = disc.data.root_pos_w[:, :3].clone()
     # print("in lifted, before disc des_pos_w is ", des_pos_w)
     # print("in lifted, disc.data.root_pos_w[:, :3] ", disc.data.root_pos_w[:, :3])
-    des_pos_w[:, 2] += delta_z
+    # des_pos_w[:, 2] += delta_z
     # print("in lifted, disc des_pos_w is ", des_pos_w)
     # print("in lifted, disc.data.root_pos_w[:, :3] ", disc.data.root_pos_w[:, :3])
     # print("in lifted, object pos is ",object.data.root_pos_w[:, :3] )
+    # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
 
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    # distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance < distance_threshold)
+    condition = (object.data.root_pos_w[:, 2] > minimal_height)
 
     return torch.where(condition, 1.0, 0.0) 
 
@@ -141,23 +142,25 @@ def object_goal_distance_six_joint(
     # this is the disc position in the world frame
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
     # print("in six joint, before des_pos_w  is ", des_pos_w )
+    # print("before des_pos_w[:, 2] is ", des_pos_w[:, 2])
     des_pos_w[:, 2] += delta_z
+    # print("des_pos_w[:, 2] is ", des_pos_w[:, 2])
     # print("in six joint, des_pos_w  is ", des_pos_w )
     # print("in six joint, object pos is ",object.data.root_pos_w[:, :3] )
 
     # calculate the distance between object and disc_pose in x y z
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
-    # the angle difference between the current joint position and the default one
-    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+    # # the angle difference between the current joint position and the default one
+    # angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
 
-    # calcualte the distance between object and disc_pose in x y
-    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance < distance_threshold)
+    # # calcualte the distance between object and disc_pose in x y
+    # distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    # condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance < distance_threshold)
 
-    # check if the object has arrived at the goal position. If yes, condition1 is 0
-    condition1 = (distance > distance_threshold)
-    condition2 = (distance < distance_threshold)
+    # # check if the object has arrived at the goal position. If yes, condition1 is 0
+    # condition1 = (distance > distance_threshold)
+    # condition2 = (distance < distance_threshold)
 
     # print("condition is ", condition)
     # print("condition1 is ", condition1)
@@ -174,7 +177,7 @@ def object_goal_distance_six_joint(
     # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
     #return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0)
-    return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0 - torch.abs(angle[:,6])*100.0*condition2 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.5*condition2 - torch.abs(angle[:,1])*3.0*condition2)
+    return 1 - torch.tanh(distance / std) 
 
 
 
