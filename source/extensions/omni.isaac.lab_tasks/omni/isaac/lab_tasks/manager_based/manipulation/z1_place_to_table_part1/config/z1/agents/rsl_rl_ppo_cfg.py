@@ -17,7 +17,7 @@ class PlaceCubePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 15000
     save_interval = 100
-    experiment_name = "z1_place_to_table"
+    experiment_name = "z1_place_to_table_part1"
     empirical_normalization = False
     policy = RslRlPpoActorCriticCfg(
         init_noise_std=1.0,
