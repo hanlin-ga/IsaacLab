@@ -15,7 +15,7 @@ from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
 
 from omni.isaac.lab_tasks.manager_based.manipulation.lift import mdp
-from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table_part1.z1_place_env_cfg import Z1PlaceEnvCfg
+from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table_part2.z1_place_env_cfg import Z1PlaceEnvCfg
 
 ##
 # Pre-defined configs
