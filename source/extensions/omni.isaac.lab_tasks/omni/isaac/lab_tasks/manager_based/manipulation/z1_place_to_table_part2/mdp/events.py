@@ -34,10 +34,9 @@ if TYPE_CHECKING:
 
 # reset_joints_by_offset
 
-def reset_joints_angle(
+def reset_robot_disc_object(
     env: ManagerBasedEnv,
     env_ids: torch.Tensor,
-    position_range: tuple[float, float],
     velocity_range: tuple[float, float],
     asset_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -50,13 +49,8 @@ def reset_joints_angle(
     """
     # extract the used quantities (to enable type-hinting)
     asset: Articulation = env.scene[asset_cfg.name]
-
     object: RigidObject = env.scene[object_cfg.name]
     disc: RigidObject = env.scene[disc_cfg.name]
-
-    # get default root state
-    object_states = object.data.default_root_state[env_ids].clone()
-    disc_states = disc.data.default_root_state[env_ids].clone()
 
     # get default joint state
     joint_pos = asset.data.default_joint_pos[env_ids].clone()

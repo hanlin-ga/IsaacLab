@@ -55,7 +55,7 @@ def object_reached_goal(
     # rewarded if the object is lifted above the threshold
     return distance < threshold
 
-def terminate_object_goal_distance(
+def terminate_object_goal_distance_record_data(
     env: ManagerBasedRLEnv,
     distance_threshold: float,
     angle_threshold: float,
