@@ -221,6 +221,17 @@ class EventCfg:
         },
     )
 
+    reset_joint_position = EventTerm(
+        func=mdp.reset_joints_angle,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+            "position_range": (-0.5, 0.5),
+            "velocity_range": (0.0, 0.0),
+        },
+    )
+
+
 
 @configclass
 class RewardsCfg:
@@ -332,7 +343,7 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 15
+        self.episode_length_s = 5
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation

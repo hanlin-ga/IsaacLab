@@ -143,7 +143,7 @@ def object_goal_distance_six_joint(
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
     # print("in six joint, before des_pos_w  is ", des_pos_w )
     # print("before des_pos_w[:, 2] is ", des_pos_w[:, 2])
-    des_pos_w[:, 2] += delta_z
+    des_pos_w[:, 2] = minimal_height
     # print("des_pos_w[:, 2] is ", des_pos_w[:, 2])
     # print("in six joint, des_pos_w  is ", des_pos_w )
     # print("in six joint, object pos is ",object.data.root_pos_w[:, :3] )

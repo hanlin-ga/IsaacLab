@@ -277,9 +277,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    # object_arrive = DoneTerm(
-    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.005, "command_name": "object_pose"}
-    # )
+    object_arrive = DoneTerm(
+        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.01, "angle_threshold": 0.17, "minimal_height": 0.9775}
+    )
 
 @configclass
 class CurriculumCfg:
