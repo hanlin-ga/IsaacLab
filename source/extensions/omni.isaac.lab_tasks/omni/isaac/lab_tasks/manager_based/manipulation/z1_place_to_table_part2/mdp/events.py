@@ -65,6 +65,7 @@ def reset_robot_disc_object(
         exit()
     N = len(env_ids)
     # N=4096
+    # print("N=",N)
     num_records = len(recorded_data["joint_angles"])
     if num_records < N:
         print(f"Not enough recorded joint angles to sample {N} sets.")
