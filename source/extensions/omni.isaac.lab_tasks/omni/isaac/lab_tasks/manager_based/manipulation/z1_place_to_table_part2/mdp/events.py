@@ -56,16 +56,20 @@ def reset_robot_disc_object(
     joint_pos = asset.data.default_joint_pos[env_ids].clone()
     joint_vel = asset.data.default_joint_vel[env_ids].clone()
 
-    # Load the recorded data
-    file_path = "recorded_data.pt"
+
+    N = len(env_ids)
+    # N=4096
+    # print("N=",N)
+
+    if N < 1000:
+        file_path = "recorded_data_1000.pt"
+    else: file_path = "recorded_data.pt"
+
     try:
         recorded_data = torch.load(file_path)
     except FileNotFoundError:
         print(f"The file {file_path} does not exist.")
         exit()
-    N = len(env_ids)
-    # N=4096
-    # print("N=",N)
     num_records = len(recorded_data["joint_angles"])
     if num_records < N:
         print(f"Not enough recorded joint angles to sample {N} sets.")
