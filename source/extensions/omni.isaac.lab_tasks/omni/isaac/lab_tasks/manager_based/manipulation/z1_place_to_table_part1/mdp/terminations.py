@@ -61,6 +61,7 @@ def terminate_object_goal_distance_record_data(
     angle_threshold: float,
     minimal_height: float,
     record_data: str,
+    MAX_RECORDS: int,
 
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -86,7 +87,7 @@ def terminate_object_goal_distance_record_data(
 
     if record_data == "True":
         # Maximum number of data sets to record
-        MAX_RECORDS = 10000
+        
 
         # Initialize storage dictionary
         if os.path.exists("recorded_data.pt"):
@@ -106,7 +107,7 @@ def terminate_object_goal_distance_record_data(
 
         for i in range(condition1.size(0)):  # Loop over each environment
             if current_records >= MAX_RECORDS:
-                print("Reached maximum record limit of 10,000. Stopping further recording.")
+                print(f"Reached maximum record limit of {MAX_RECORDS}. Stopping further recording.")
                 break  # Stop recording if limit is reached
             if condition1[i].item() and condition2[i].item():  # Only save if both conditions are True for this environment
                 # Append data for each quantity when conditions are met for this specific environment

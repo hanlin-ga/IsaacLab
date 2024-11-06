@@ -64,6 +64,7 @@ def reset_robot_disc_object(
         print(f"The file {file_path} does not exist.")
         exit()
     N = len(env_ids)
+    # N=4096
     num_records = len(recorded_data["joint_angles"])
     if num_records < N:
         print(f"Not enough recorded joint angles to sample {N} sets.")
@@ -86,6 +87,6 @@ def reset_robot_disc_object(
 
     # set into the physics simulation
     asset.write_joint_state_to_sim(joint_pos, joint_vel, env_ids=env_ids)
-    object.write_root_pose_to_sim(torch.cat([object_position+asset.data.root_pos_w, object_angle], dim=-1), env_ids=env_ids)
-    disc.write_root_pose_to_sim(torch.cat([disc_position+asset.data.root_pos_w, disc_angle], dim=-1), env_ids=env_ids)
+    object.write_root_pose_to_sim(torch.cat([object_position+asset.data.root_pos_w[env_ids], object_angle], dim=-1), env_ids=env_ids)
+    disc.write_root_pose_to_sim(torch.cat([disc_position+asset.data.root_pos_w[env_ids], disc_angle], dim=-1), env_ids=env_ids)
     # asset.write_root_velocity_to_sim(velocities, env_ids=env_ids)
