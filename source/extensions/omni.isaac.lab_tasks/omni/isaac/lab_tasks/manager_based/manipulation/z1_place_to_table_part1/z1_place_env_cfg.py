@@ -240,7 +240,6 @@ class RewardsCfg:
         params={"std": 0.05, "delta_z": 0.08, "distance_threshold": 0.05, "minimal_height": 0.9775, "command_name": "disc_pose"},
         weight=5.0,
     )
-
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
 
