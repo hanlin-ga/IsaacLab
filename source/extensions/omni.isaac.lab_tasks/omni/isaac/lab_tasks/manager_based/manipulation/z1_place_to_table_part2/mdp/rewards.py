@@ -116,10 +116,8 @@ def object_goal_distance_six_joint(
     env: ManagerBasedRLEnv,
     std: float,
 
-    delta_z: float,
     distance_threshold: float,
     minimal_height: float,
-    command_name: str,
 
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -127,7 +125,7 @@ def object_goal_distance_six_joint(
 ) -> torch.Tensor:
     """Reward the agent for tracking the goal pose using tanh-kernel."""
     # extract the used quantities (to enable type-hinting)
-    robot: RigidObject = env.scene[robot_cfg.name]
+
     object: RigidObject = env.scene[object_cfg.name]
     asset: Articulation = env.scene[robot_cfg.name]
     disc: RigidObject = env.scene[disc_cfg.name]
@@ -141,23 +139,23 @@ def object_goal_distance_six_joint(
     # this is the disc position in the world frame
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
     # print("in six joint, before des_pos_w  is ", des_pos_w )
-    des_pos_w[:, 2] += delta_z
+    # des_pos_w[:, 2] += delta_z
     # print("in six joint, des_pos_w  is ", des_pos_w )
     # print("in six joint, object pos is ",object.data.root_pos_w[:, :3] )
 
     # calculate the distance between object and disc_pose in x y z
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    # distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
     # the angle difference between the current joint position and the default one
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
 
     # calcualte the distance between object and disc_pose in x y
     distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance < distance_threshold)
+    # condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
 
     # check if the object has arrived at the goal position. If yes, condition1 is 0
-    condition1 = (distance > distance_threshold)
-    condition2 = (distance < distance_threshold)
+    condition1 = (distance_xy > distance_threshold)
+    # condition2 = (distance_xy < distance_threshold)
 
     # print("condition is ", condition)
     # print("condition1 is ", condition1)
@@ -174,7 +172,7 @@ def object_goal_distance_six_joint(
     # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
     # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
     #return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0)
-    return condition  * (1 - torch.tanh(distance / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0 - torch.abs(angle[:,6])*100.0*condition2 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.5*condition2 - torch.abs(angle[:,1])*3.0*condition2)
+    return (1 - torch.tanh(distance_xy / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,6])*1.0 )
 
 
 
@@ -261,11 +259,8 @@ def undesired_contacts_xy(env: ManagerBasedRLEnv,
     return condition*(1-torch.tanh(max_contact/std))
 
 def release_reward(env: ManagerBasedRLEnv, 
-
-                     delta_z: float,
                      distance_threshold: float,
-                     command_name: str,
-                     
+
                      robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
                      object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
                      disc_cfg: SceneEntityCfg = SceneEntityCfg("disc"),) -> torch.Tensor:
@@ -274,22 +269,13 @@ def release_reward(env: ManagerBasedRLEnv,
     asset: Articulation = env.scene[robot_cfg.name]
     disc: RigidObject = env.scene[disc_cfg.name]
 
-    # robot: RigidObject = env.scene[robot_cfg.name]
-    # command = env.command_manager.get_command(command_name)
-
-    # # compute the distance between object and disc_pose
-    # des_pos_b = command[:, :3]
-    # des_pos_w, _ = combine_frame_transforms(robot.data.root_state_w[:, :3], robot.data.root_state_w[:, 3:7], des_pos_b)
-    # des_pos_w[:, 2] += delta_z
 
     # this is the disc position in the world frame
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
-    des_pos_w[:, 2] += delta_z
 
-    distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    # distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
     distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
-    condition = (distance < distance_threshold)
-
+    condition = (distance_xy < distance_threshold)
     angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
 
     # current_angle = asset.data.joint_pos[:, robot_cfg.joint_ids]
@@ -302,7 +288,7 @@ def release_reward(env: ManagerBasedRLEnv,
     # print("(0.04 - torch.abs(angle[:,6])) is ", (0.04 - torch.abs(angle[:,6])))
     # print("condition * (0.0085 - torch.abs(angle[:,6])) is ", condition * (0.0085 - torch.abs(angle[:,6])))
 
-    return condition * (0.0085 - torch.abs(angle[:,6])) + condition * 0.1
+    return condition * (1 - torch.abs(angle[:,6])) 
 
 def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
                                  object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
