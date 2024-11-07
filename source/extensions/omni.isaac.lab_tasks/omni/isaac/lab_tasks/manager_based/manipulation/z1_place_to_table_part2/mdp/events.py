@@ -28,13 +28,19 @@ from omni.isaac.lab.assets import Articulation, DeformableObject, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.terrains import TerrainImporter
 import random
+import os
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedEnv
 
 
-file_path = "recorded_data_total.pt"
-recorded_data = torch.load(file_path)
+# Define the directory and file path
+directory = "recorded_data"
+os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+file_name = os.path.join(directory, f"recorded_data_100000.pt")
+
+# file_path = "recorded_data_total.pt"
+recorded_data = torch.load(file_name)
 
 # reset_joints_by_offset
 

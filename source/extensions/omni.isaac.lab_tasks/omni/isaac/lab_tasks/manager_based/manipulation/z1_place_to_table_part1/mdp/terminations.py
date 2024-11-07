@@ -25,23 +25,14 @@ if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 
-# Define the directory and file path
-directory = "recorded_data"
-os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
-file_name = os.path.join(directory, f"recorded_data_total.pt")
 
-
-# Initialize storage dictionary
-if os.path.exists(file_name):
-    recorded_data = torch.load(file_name)
-else:
-    recorded_data = {
-        "object_position": [],
-        "object_angle": [],
-        "disc_position": [],
-        "disc_angle": [],
-        "joint_angles": []
-    }
+recorded_data = {
+    "object_position": [],
+    "object_angle": [],
+    "disc_position": [],
+    "disc_angle": [],
+    "joint_angles": []
+}
 
 
 def object_reached_goal(
@@ -129,6 +120,11 @@ def terminate_object_goal_distance_record_data(
 
         # At the end of the experiment or after certain conditions, save data if there's any recorded
         if recorded_data["object_position"] and current_records > MAX_RECORDS:  # Check if there’s any data to save
+            # Define the directory and file path
+            directory = "recorded_data"
+            os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+            file_name = os.path.join(directory, f"recorded_data_{current_records}.pt")
+            print("final data length is ", len(recorded_data["object_position"]))
             torch.save(recorded_data, file_name)
             exit()
 
