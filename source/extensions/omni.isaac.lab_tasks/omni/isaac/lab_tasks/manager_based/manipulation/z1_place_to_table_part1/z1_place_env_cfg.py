@@ -276,15 +276,14 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance_record_data, 
-        params={"distance_threshold": 0.01, 
-                "angle_threshold": 0.17, 
-                "minimal_height": 0.9775, 
-                "record_data": "True", 
-                "MAX_RECORDS": 100, 
-                "file_index": 8}
-    )   
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance_record_data, 
+    #     params={"distance_threshold": 0.01, 
+    #             "angle_threshold": 0.17, 
+    #             "minimal_height": 0.9775, 
+    #             "record_data": "True", 
+    #             "MAX_RECORDS": 10000}
+    # )
 
 @configclass
 class CurriculumCfg:

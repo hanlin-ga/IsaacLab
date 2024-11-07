@@ -32,6 +32,10 @@ import random
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedEnv
 
+
+file_path = "recorded_data_total.pt"
+recorded_data = torch.load(file_path)
+
 # reset_joints_by_offset
 
 def reset_robot_disc_object(
@@ -58,18 +62,8 @@ def reset_robot_disc_object(
 
 
     N = len(env_ids)
-    # N=4096
-    # print("N=",N)
+    global recorded_data
 
-    if N < 1000:
-        file_path = "recorded_data_1000.pt"
-    else: file_path = "recorded_data.pt"
-
-    try:
-        recorded_data = torch.load(file_path)
-    except FileNotFoundError:
-        print(f"The file {file_path} does not exist.")
-        exit()
     num_records = len(recorded_data["joint_angles"])
     if num_records < N:
         print(f"Not enough recorded joint angles to sample {N} sets.")
