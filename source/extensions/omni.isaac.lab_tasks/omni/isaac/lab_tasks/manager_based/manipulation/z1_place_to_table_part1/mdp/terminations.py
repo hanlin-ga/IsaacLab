@@ -62,6 +62,7 @@ def terminate_object_goal_distance_record_data(
     minimal_height: float,
     record_data: str,
     MAX_RECORDS: int,
+    file_index: int,
 
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -85,13 +86,18 @@ def terminate_object_goal_distance_record_data(
     condition2 = quat_error_magnitude_xy(cube_quat_w, default_quat_w) < angle_threshold
 
 
+    # Define the directory and file path
+    directory = "recorded_data"
+    os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+    file_name = os.path.join(directory, f"recorded_data_{file_index}.pt")
+
     if record_data == "True":
         # Maximum number of data sets to record
         
-
+        
         # Initialize storage dictionary
-        if os.path.exists("recorded_data.pt"):
-            recorded_data = torch.load("recorded_data.pt")
+        if os.path.exists(file_name):
+            recorded_data = torch.load(file_name)
         else:
             recorded_data = {
                 "object_position": [],
@@ -108,6 +114,7 @@ def terminate_object_goal_distance_record_data(
         for i in range(condition1.size(0)):  # Loop over each environment
             if current_records >= MAX_RECORDS:
                 print(f"Reached maximum record limit of {MAX_RECORDS}. Stopping further recording.")
+                exit()
                 break  # Stop recording if limit is reached
             if condition1[i].item() and condition2[i].item():  # Only save if both conditions are True for this environment
                 # Append data for each quantity when conditions are met for this specific environment
@@ -120,7 +127,7 @@ def terminate_object_goal_distance_record_data(
 
         # At the end of the experiment or after certain conditions, save data if there's any recorded
         if recorded_data["object_position"] and current_records < MAX_RECORDS:  # Check if there’s any data to save
-            torch.save(recorded_data, "recorded_data.pt")
+            torch.save(recorded_data, file_name)
 
     # print("*"*100)
     # print("condition1 & condition2 is ", (condition1 & condition2).shape)
