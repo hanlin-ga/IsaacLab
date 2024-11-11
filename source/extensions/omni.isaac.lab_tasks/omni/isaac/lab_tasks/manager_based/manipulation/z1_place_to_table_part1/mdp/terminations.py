@@ -25,6 +25,16 @@ if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
 
 
+
+recorded_data = {
+    "object_position": [],
+    "object_angle": [],
+    "disc_position": [],
+    "disc_angle": [],
+    "joint_angles": []
+}
+
+
 def object_reached_goal(
     env: ManagerBasedRLEnv,
     command_name: str = "object_pose",
@@ -62,7 +72,7 @@ def terminate_object_goal_distance_record_data(
     minimal_height: float,
     record_data: str,
     MAX_RECORDS: int,
-    file_index: int,
+    
 
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
     object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
@@ -86,36 +96,19 @@ def terminate_object_goal_distance_record_data(
     condition2 = quat_error_magnitude_xy(cube_quat_w, default_quat_w) < angle_threshold
 
 
-    # Define the directory and file path
-    directory = "recorded_data"
-    os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
-    file_name = os.path.join(directory, f"recorded_data_{file_index}.pt")
-
     if record_data == "True":
         # Maximum number of data sets to record
+        global recorded_data
         
-        
-        # Initialize storage dictionary
-        if os.path.exists(file_name):
-            recorded_data = torch.load(file_name)
-        else:
-            recorded_data = {
-                "object_position": [],
-                "object_angle": [],
-                "disc_position": [],
-                "disc_angle": [],
-                "joint_angles": []
-            }
-
-
         # Check current number of records
         current_records = len(recorded_data["object_position"])
+        print("current records length is ", current_records)
 
         for i in range(condition1.size(0)):  # Loop over each environment
-            if current_records >= MAX_RECORDS:
-                print(f"Reached maximum record limit of {MAX_RECORDS}. Stopping further recording.")
-                exit()
-                break  # Stop recording if limit is reached
+            # if current_records >= MAX_RECORDS:
+            #     print(f"Reached maximum record limit of {MAX_RECORDS}. Stopping further recording.")
+            #     exit()
+            #     break  # Stop recording if limit is reached
             if condition1[i].item() and condition2[i].item():  # Only save if both conditions are True for this environment
                 # Append data for each quantity when conditions are met for this specific environment
                 recorded_data["object_position"].append(object.data.root_pos_w[i, :].cpu() - asset.data.root_pos_w[i, :].cpu())
@@ -126,8 +119,14 @@ def terminate_object_goal_distance_record_data(
                 current_records += 1
 
         # At the end of the experiment or after certain conditions, save data if there's any recorded
-        if recorded_data["object_position"] and current_records < MAX_RECORDS:  # Check if there’s any data to save
+        if recorded_data["object_position"] and current_records > MAX_RECORDS:  # Check if there’s any data to save
+            # Define the directory and file path
+            directory = "recorded_data"
+            os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+            file_name = os.path.join(directory, f"recorded_data_{current_records}.pt")
+            print("final data length is ", len(recorded_data["object_position"]))
             torch.save(recorded_data, file_name)
+            exit()
 
     # print("*"*100)
     # print("condition1 & condition2 is ", (condition1 & condition2).shape)

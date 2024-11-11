@@ -28,9 +28,19 @@ from omni.isaac.lab.assets import Articulation, DeformableObject, RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.terrains import TerrainImporter
 import random
+import os
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedEnv
+
+
+# Define the directory and file path
+directory = "recorded_data"
+os.makedirs(directory, exist_ok=True)  # Ensure the directory exists
+file_name = os.path.join(directory, f"recorded_data_100000.pt")
+
+# file_path = "recorded_data_total.pt"
+recorded_data = torch.load(file_name)
 
 # reset_joints_by_offset
 
@@ -58,18 +68,8 @@ def reset_robot_disc_object(
 
 
     N = len(env_ids)
-    # N=4096
-    # print("N=",N)
+    global recorded_data
 
-    if N < 1000:
-        file_path = "recorded_data_1000.pt"
-    else: file_path = "recorded_data.pt"
-
-    try:
-        recorded_data = torch.load(file_path)
-    except FileNotFoundError:
-        print(f"The file {file_path} does not exist.")
-        exit()
     num_records = len(recorded_data["joint_angles"])
     if num_records < N:
         print(f"Not enough recorded joint angles to sample {N} sets.")
