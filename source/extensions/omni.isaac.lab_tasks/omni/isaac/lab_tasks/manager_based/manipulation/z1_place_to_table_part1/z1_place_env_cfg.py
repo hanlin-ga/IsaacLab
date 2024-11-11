@@ -226,18 +226,18 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1.0)
-    # lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9775, "delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=15.0)
+    reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.094, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9575, "delta_z": 0.094, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "delta_z": 0.08, "distance_threshold": 0.05, "minimal_height": 0.9775, "command_name": "disc_pose"},
+        params={"std": 0.3, "delta_z": 0.08, "distance_threshold": 0.03, "minimal_height": 0.9575, "command_name": "disc_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "delta_z": 0.08, "distance_threshold": 0.05, "minimal_height": 0.9775, "command_name": "disc_pose"},
+        params={"std": 0.05, "delta_z": 0.08, "distance_threshold": 0.03, "minimal_height": 0.9575, "command_name": "disc_pose"},
         weight=5.0,
     )
     # action penalty
@@ -255,7 +255,9 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 50, "ID": "cabinet_sektion"},
     )
 
-    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-2.0)
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, 
+                                     weight=-5.0,
+                                     params={"delta_angle": 0.17})
 
     # object_undesired_contacts = RewTerm(
     #     func=mdp.undesired_contacts_xy,
@@ -278,12 +280,13 @@ class TerminationsCfg:
     # added a new threshold for the object to be considered as arrived
     # object_arrive = DoneTerm(
     #     func=mdp.terminate_object_goal_distance_record_data, 
-    #     params={"distance_threshold": 0.01, 
+    #     params={"distance_threshold": 0.02, 
     #             "angle_threshold": 0.17, 
     #             "minimal_height": 0.9775, 
-    #             "record_data": "True", 
-    #             "MAX_RECORDS": 100000}
-    # )
+    #             "record_data": "False", 
+    #             "MAX_RECORDS": 100, 
+    #             "file_index": 8}
+    # )   
 
 @configclass
 class CurriculumCfg:
@@ -351,3 +354,4 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
+ 

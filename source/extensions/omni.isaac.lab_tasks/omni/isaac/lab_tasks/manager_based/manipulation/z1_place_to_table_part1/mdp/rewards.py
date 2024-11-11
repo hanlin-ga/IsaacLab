@@ -308,17 +308,22 @@ def release_reward(env: ManagerBasedRLEnv,
     return condition * (0.0085 - torch.abs(angle[:,6])) + condition * 0.1
 
 def object_goal_orientation_diff_rew(env: ManagerBasedRLEnv, 
+                                     delta_angle: float,
                                  object_cfg: SceneEntityCfg = SceneEntityCfg("object"),) -> torch.Tensor:
     
     object: RigidObject = env.scene[object_cfg.name]
 
     cube_quat_w = object.data.root_quat_w
     default_quat_w = object.data.default_root_state[:, 3:7]
+
+    reward1 = quat_error_magnitude_xy(cube_quat_w, default_quat_w)
+    condition1 = (reward1 < delta_angle*1.5)
+    condition2 = (reward1 < delta_angle)
     # orientation_diff = quat_mul(cube_quat_w, quat_conjugate(default_quat_w))
     # example_quat_w = object.data.default_root_state[:, 3:7]
     # print("example angle diff is ", quat_error_magnitude_xy(cube_quat_w , default_quat_w))
     # print("orientation_diff is ", orientation_diff)
-    return quat_error_magnitude_xy(cube_quat_w, default_quat_w)
+    return reward1 - condition1*5.0 - condition2*5.0
 
 
 
