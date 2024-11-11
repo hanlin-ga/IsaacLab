@@ -256,7 +256,7 @@ class RewardsCfg:
     )
 
     object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, 
-                                     weight=-1.0,
+                                     weight=-5.0,
                                      params={"delta_angle": 0.17})
 
     # object_undesired_contacts = RewTerm(
