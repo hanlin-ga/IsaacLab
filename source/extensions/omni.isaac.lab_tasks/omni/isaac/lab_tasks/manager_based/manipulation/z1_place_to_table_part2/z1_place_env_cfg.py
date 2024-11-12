@@ -273,7 +273,7 @@ class RewardsCfg:
     #     weight=10.0,
     #     params={"delta_z": 0.094, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
     # )
-    release_reward = RewTerm(func=mdp.release_reward, params={"distance_threshold": 0.02}, weight=1000.0)
+    release_reward = RewTerm(func=mdp.release_reward, params={"distance_threshold": 0.02}, weight=10.0)
 
 
 @configclass
@@ -342,7 +342,7 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 5
+        self.episode_length_s = 12
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
@@ -357,3 +357,4 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
+ 

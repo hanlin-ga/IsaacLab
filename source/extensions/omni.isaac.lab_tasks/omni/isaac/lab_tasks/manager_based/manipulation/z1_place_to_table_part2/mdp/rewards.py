@@ -154,25 +154,11 @@ def object_goal_distance_six_joint(
     # condition = (object.data.root_pos_w[:, 2] > minimal_height) | (distance_xy < distance_threshold)
 
     # check if the object has arrived at the goal position. If yes, condition1 is 0
-    condition1 = (distance_xy > distance_threshold)
-    # condition2 = (distance_xy < distance_threshold)
+    # condition1 = (distance_xy > distance_threshold)
+    condition2 = (distance_xy < distance_threshold).float()
 
-    # print("condition is ", condition)
-    # print("condition1 is ", condition1)
-    # print("condition2 is ", condition2)
-    # print("*"*100)
-    # print("distance_xy is ", distance_xy)
-    # print("object.data.root_pos_w[:, 2] is ", object.data.root_pos_w[:, 2])
-    # print("asset.data.joint_pos[:, robot_cfg.joint_ids] is ", asset.data.joint_pos[:, robot_cfg.joint_ids])
-    # print("default_joint_pos is ", asset.data.default_joint_pos[:, robot_cfg.joint_ids])
-    # print("angle is ", angle)
-    # return torch.sum(torch.abs(angle[:,0:6]), dim=1)
-    # print("(object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1) is ", (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1))
-    # rewarded if the object is lifted above the threshold
-    # print("torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 is ", torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1)
-    # print("torch.abs(angle[:,6])*0.5 is ", torch.abs(angle[:,5])*0.5)
-    #return (object.data.root_pos_w[:, 2] > minimal_height) * ((1 - torch.tanh(distance / std)) - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,5])*1.0)
-    return (1 - torch.tanh(distance_xy / std) * condition1 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*0.1 - torch.abs(angle[:,6])*1.0 )
+
+    return condition2 - torch.sum(torch.abs(angle[:,0:6]), dim=1)*2 - torch.abs(angle[:,6])*5.0
 
 
 
@@ -413,3 +399,4 @@ def object_goal_distance(
 
     # rewarded if the object is lifted above the threshold
     return condition * (1 - torch.tanh(distance / std))
+ 
