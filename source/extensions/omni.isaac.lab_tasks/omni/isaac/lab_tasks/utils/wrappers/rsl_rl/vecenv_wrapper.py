@@ -179,14 +179,22 @@ class RslRlVecEnvWrapper(VecEnv):
         # return observations
         return obs_dict["policy"], {"observations": obs_dict}
 
-    def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
+    def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict, torch.Tensor]:
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
+        second_dones = self.env.get_reset_buf_id()
+        print("second_dones : ", second_dones)
+        
         self.step_counter += 1
         # print("terminated : ", terminated)
         # print("truncated : ", truncated)  
         # compute dones for compatibility with RSL-RL
         dones = (terminated | truncated).to(dtype=torch.long)
+
+        # print("terminated: ", terminated)
+        # terminated = torch.where(terminated == 1, torch.tensor(0, device='cuda:0'), terminated)
+        # print("changed terminated: ", terminated)
+
         # move extra observations to the extras dict
         obs = obs_dict["policy"]
         extras["observations"] = obs_dict
@@ -214,7 +222,7 @@ class RslRlVecEnvWrapper(VecEnv):
             self.step_counter = 0
 
         # return the step information
-        return obs, rew, dones, extras
+        return obs, rew, dones, extras, second_dones
 
     def close(self):  # noqa: D102
         return self.env.close()

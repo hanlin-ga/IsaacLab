@@ -88,6 +88,7 @@ def terminate_object_goal_distance_record_data(
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
     des_pos_w[:, 2] = minimal_height
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
+    print("distance is ", distance)
 
     condition1 = distance < distance_threshold
 
@@ -140,4 +141,41 @@ def terminate_object_goal_distance_record_data(
     # print("joint angles are ", asset.data.joint_pos[:, robot_cfg.joint_ids])
 
 
+    return condition1 & condition2
+
+
+def joint_reach_goal(
+    env: ManagerBasedRLEnv,
+    distance_threshold: float = 0.02,
+    angle_threshold: float = 0.02,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
+    disc_cfg: SceneEntityCfg = SceneEntityCfg("disc"),
+) -> torch.Tensor:
+    """Termination condition for the object reaching the goal position.
+
+    Args:
+        env: The environment.
+        command_name: The name of the command that is used to control the object.
+        threshold: The threshold for the object to reach the goal position. Defaults to 0.02.
+        robot_cfg: The robot configuration. Defaults to SceneEntityCfg("robot").
+        object_cfg: The object configuration. Defaults to SceneEntityCfg("object").
+
+    """
+    # extract the used quantities (to enable type-hinting)
+    asset: Articulation = env.scene[robot_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+    disc: RigidObject = env.scene[disc_cfg.name]
+
+    # disc position in world frame
+    des_pos_w = disc.data.root_pos_w[:, :3].clone()
+    distance_xy = torch.norm(des_pos_w[:, :2] - object.data.root_pos_w[:, :2], dim=1)
+    condition1 = (distance_xy < distance_threshold)
+
+    angle = asset.data.joint_pos[:, robot_cfg.joint_ids] - asset.data.default_joint_pos[:, robot_cfg.joint_ids]
+
+    condition2 = (torch.abs(angle[:, :6]) < angle_threshold).all(dim=1)
+
+        
+    # rewarded if the object is lifted above the threshold
     return condition1 & condition2

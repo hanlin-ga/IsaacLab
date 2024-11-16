@@ -187,15 +187,28 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         self.episode_length_buf += 1  # step in current episode (per env)
         self.common_step_counter += 1  # total step (common for all envs)
         # -- check terminations
-        self.reset_buf = self.termination_manager.compute()
+        # self.reset_buf = self.termination_manager.compute()
+        
+        # -- check if the object and each joint have arrived at the goal position
+        self.reset_buf = self.termination_manager.compute_not_name_id(name_id="object_joint_arrive")
+        self.reset_buf_id = self.termination_manager.compute_name_id(name_id="object_joint_arrive")
+
+
         self.reset_terminated = self.termination_manager.terminated
         self.reset_time_outs = self.termination_manager.time_outs
         # -- reward computation
         self.reward_buf = self.reward_manager.compute(dt=self.step_dt)
 
         # -- reset envs that terminated/timed-out and log the episode information
-        reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
+        # reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
+
+        self.reset_buf_id = self.reset_buf_id  |  self.reset_time_outs 
+        reset_env_ids = self.reset_buf_id.nonzero(as_tuple=False).squeeze(-1)  
         if len(reset_env_ids) > 0:
+            print("*"*50)
+            print("*"*50)
+            print("*"*50)
+            print("reset_env_ids: ", reset_env_ids)
             self._reset_idx(reset_env_ids)
             # if sensors are added to the scene, make sure we render to reflect changes in reset
             if self.sim.has_rtx_sensors() and self.cfg.rerender_on_reset:
@@ -212,6 +225,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
 
         # return observations, rewards, resets and extras
         return self.obs_buf, self.reward_buf, self.reset_terminated, self.reset_time_outs, self.extras
+    
+    def get_reset_buf_id(self):
+        return self.reset_buf_id
 
     def render(self, recompute: bool = False) -> np.ndarray | None:
         """Run rendering without stepping through the physics.
