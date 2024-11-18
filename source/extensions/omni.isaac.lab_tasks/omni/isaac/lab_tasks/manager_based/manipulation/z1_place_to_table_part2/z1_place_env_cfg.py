@@ -252,7 +252,7 @@ class RewardsCfg:
     # )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-10)
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
@@ -273,7 +273,7 @@ class RewardsCfg:
     #     weight=10.0,
     #     params={"delta_z": 0.094, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
     # )
-    release_reward = RewTerm(func=mdp.release_reward, params={"distance_threshold": 0.02}, weight=10.0)
+    # release_reward = RewTerm(func=mdp.release_reward, params={"distance_threshold": 0.02}, weight=10.0)
 
 
 @configclass
@@ -296,7 +296,7 @@ class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
     action_rate = CurrTerm(
-        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000}
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -10, "num_steps": 10000}
     )
 
     joint_vel = CurrTerm(
@@ -342,7 +342,7 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 20
+        self.episode_length_s = 12
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
@@ -357,4 +357,5 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
+ 
  
