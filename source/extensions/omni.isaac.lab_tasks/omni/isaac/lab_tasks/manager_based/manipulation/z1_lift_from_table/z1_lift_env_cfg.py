@@ -210,22 +210,22 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.897}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9510}, weight=15.0)
 
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "minimal_height": 0.897, "command_name": "object_pose"},
+        params={"std": 0.3, "minimal_height": 0.9510, "command_name": "object_pose"},
         weight=16.0,
     )
 
     object_goal_tracking_fine_grained = RewTerm(
         func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "minimal_height": 0.897, "command_name": "object_pose"},
+        params={"std": 0.05, "minimal_height": 0.9510, "command_name": "object_pose"},
         weight=5.0,
     )
 
     # action penalty
-    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1)
+    action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
 
     joint_vel = RewTerm(
         func=mdp.joint_vel_l2,
@@ -239,14 +239,15 @@ class RewardsCfg:
     #     params={"soft_ratio": 0.25, "asset_cfg": SceneEntityCfg("robot")},
     # )
 
-    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
 
     cabinet_sektion_undesired_contacts = RewTerm(
         func=mdp.undesired_contacts_id,
         weight=-1.0,
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 30, "ID": "cabinet_sektion"},
     )
-    
+
+    # object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
+
     # This reward is designed for bleach object out of the camera scene problem
     # object_goal_orien_diff = RewTerm(func=mdp.end_effector_orientation_diff_rew, weight=-1, params={"default_quat": [0.0268,  0.9899,  0.0361, -0.1343]})
 
@@ -262,17 +263,17 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    object_arrive = DoneTerm(
-        func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.005, "command_name": "object_pose"}
-    )
+    # object_arrive = DoneTerm(
+    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.01, "command_name": "object_pose"}
+    # )
 
 @configclass
 class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
-    # action_rate = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000}
-    # )
+    action_rate = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "action_rate", "weight": -1e-1, "num_steps": 10000}
+    )
 
     joint_vel = CurrTerm(
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
@@ -317,7 +318,7 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 2
-        self.episode_length_s = 30.0
+        self.episode_length_s = 10.0
         # simulation settings
         self.sim.dt = 0.01  # 100Hz
         self.sim.render_interval = self.decimation
@@ -332,3 +333,4 @@ class Z1LiftEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_found_lost_aggregate_pairs_capacity = 1024 * 1024 * 4
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
+ 
