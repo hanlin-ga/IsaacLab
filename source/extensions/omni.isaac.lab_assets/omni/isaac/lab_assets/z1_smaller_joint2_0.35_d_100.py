@@ -72,7 +72,7 @@ Z1_CFG = ArticulationCfg(
             effort_limit=30.0,
             velocity_limit=0.349,
             stiffness=91.2,
-            damping=10,  # 100
+            damping=100,
         ),
         "joint4": ImplicitActuatorCfg(
             joint_names_expr=["joint[4]"],
