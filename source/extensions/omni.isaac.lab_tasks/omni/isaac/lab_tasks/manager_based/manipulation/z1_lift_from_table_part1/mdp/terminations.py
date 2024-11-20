@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from omni.isaac.lab.assets import RigidObject
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.utils.math import combine_frame_transforms
+from omni.isaac.lab.sensors import FrameTransformer
 
 if TYPE_CHECKING:
     from omni.isaac.lab.envs import ManagerBasedRLEnv
@@ -74,8 +75,22 @@ def terminate_object_goal_distance(
 
 
 def object_lifted(
-    env: ManagerBasedRLEnv, minimal_height: float, object_cfg: SceneEntityCfg = SceneEntityCfg("object")
+    env: ManagerBasedRLEnv, 
+    minimal_height: float,
+    distance_threshold: float,
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("ee_frame")
 ) -> torch.Tensor:
     """Reward the agent for lifting the object above the minimal height."""
     object: RigidObject = env.scene[object_cfg.name]
-    return object.data.root_pos_w[:, 2] > minimal_height
+    ee_frame: FrameTransformer = env.scene[ee_frame_cfg.name]
+
+    cube_pos_w = object.data.root_pos_w
+    ee_w = ee_frame.data.target_pos_w[..., 0, :]
+
+    object_ee_distance = torch.norm(cube_pos_w - ee_w, dim=1)
+
+    condition1 = object.data.root_pos_w[:, 2] > minimal_height
+    condition2 = object_ee_distance < distance_threshold
+
+    return condition1 & condition2

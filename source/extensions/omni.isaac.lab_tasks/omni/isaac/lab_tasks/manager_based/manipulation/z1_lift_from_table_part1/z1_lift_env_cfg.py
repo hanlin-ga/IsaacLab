@@ -259,7 +259,7 @@ class TerminationsCfg:
 
     # added a new threshold for the object to be considered as arrived
     object_lifted = DoneTerm(
-        func=mdp.object_lifted, params={"minimal_height": 0.953}
+        func=mdp.object_lifted, params={"minimal_height": 0.953, "distance_threshold": 0.04}
     )
 
 @configclass
