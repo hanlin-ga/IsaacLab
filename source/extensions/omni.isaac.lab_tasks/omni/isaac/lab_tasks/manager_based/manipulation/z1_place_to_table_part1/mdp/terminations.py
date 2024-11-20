@@ -31,7 +31,8 @@ recorded_data = {
     "object_angle": [],
     "disc_position": [],
     "disc_angle": [],
-    "joint_angles": []
+    "joint_angles": [],
+    "joint_velocities": []
 }
 
 
@@ -116,6 +117,7 @@ def terminate_object_goal_distance_record_data(
                 recorded_data["disc_position"].append(disc.data.root_pos_w[i, :].cpu() - asset.data.root_pos_w[i, :].cpu())
                 recorded_data["disc_angle"].append(disc.data.root_quat_w[i, :].cpu())
                 recorded_data["joint_angles"].append(asset.data.joint_pos[i, robot_cfg.joint_ids].cpu())
+                recorded_data["joint_velocities"].append(asset.data.joint_vel[i, robot_cfg.joint_ids].cpu())
                 current_records += 1
 
         # At the end of the experiment or after certain conditions, save data if there's any recorded
