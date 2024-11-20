@@ -212,19 +212,19 @@ class RewardsCfg:
     """Reward terms for the MDP."""
 
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1}, weight=1.0)
-    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9510}, weight=15.0)
+    lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.953}, weight=15.0)
 
-    object_goal_tracking = RewTerm(
-        func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.3, "minimal_height": 0.9510, "command_name": "object_pose"},
-        weight=16.0,
-    )
+    # object_goal_tracking = RewTerm(
+    #     func=mdp.object_goal_distance_six_joint,
+    #     params={"std": 0.3, "minimal_height": 0.9510, "command_name": "object_pose"},
+    #     weight=16.0,
+    # )
 
-    object_goal_tracking_fine_grained = RewTerm(
-        func=mdp.object_goal_distance_six_joint,
-        params={"std": 0.05, "minimal_height": 0.9510, "command_name": "object_pose"},
-        weight=5.0,
-    )
+    # object_goal_tracking_fine_grained = RewTerm(
+    #     func=mdp.object_goal_distance_six_joint,
+    #     params={"std": 0.05, "minimal_height": 0.9510, "command_name": "object_pose"},
+    #     weight=5.0,
+    # )
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
@@ -241,7 +241,7 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 30, "ID": "cabinet_sektion"},
     )
 
-    # object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1.0)
+    object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, weight=-1e-4)
 
     # This reward is designed for bleach object out of the camera scene problem
     # object_goal_orien_diff = RewTerm(func=mdp.end_effector_orientation_diff_rew, weight=-1, params={"default_quat": [0.0268,  0.9899,  0.0361, -0.1343]})
@@ -258,9 +258,9 @@ class TerminationsCfg:
     )
 
     # added a new threshold for the object to be considered as arrived
-    # object_arrive = DoneTerm(
-    #     func=mdp.terminate_object_goal_distance, params={"distance_threshold": 0.01, "command_name": "object_pose"}
-    # )
+    object_lifted = DoneTerm(
+        func=mdp.object_lifted, params={"minimal_height": 0.953}
+    )
 
 @configclass
 class CurriculumCfg:
@@ -274,6 +274,9 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
 
+    object_goal_orien_diff = CurrTerm(
+        func=mdp.modify_reward_weight, params={"term_name": "object_goal_orien_diff", "weight": -1e-1, "num_steps": 10000}
+    )
     # joint_pos = CurrTerm(
     #     func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
     # )

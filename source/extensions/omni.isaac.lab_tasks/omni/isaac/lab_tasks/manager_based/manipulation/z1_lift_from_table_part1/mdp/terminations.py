@@ -71,3 +71,11 @@ def terminate_object_goal_distance(
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
 
     return distance < distance_threshold
+
+
+def object_lifted(
+    env: ManagerBasedRLEnv, minimal_height: float, object_cfg: SceneEntityCfg = SceneEntityCfg("object")
+) -> torch.Tensor:
+    """Reward the agent for lifting the object above the minimal height."""
+    object: RigidObject = env.scene[object_cfg.name]
+    return object.data.root_pos_w[:, 2] > minimal_height
