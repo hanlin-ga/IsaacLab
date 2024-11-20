@@ -149,7 +149,7 @@ class CommandsCfg:
         asset_name="robot",
         body_name=MISSING,  # will be set by agent env cfg
         resampling_time_range=(5.0, 5.0),
-        debug_vis=False,
+        debug_vis=True,
         ranges=mdp.UniformPoseCommandCfg.Ranges(   #0.3707, -0.0079,  1.2895
             # pos_x=(0.2976, 0.2976), pos_y=(0, 0), pos_z=(0.35, 0.35), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
             pos_x=(0.2878, 0.2878), pos_y=(0, 0), pos_z=(0.27, 0.27), roll=(0.0, 0.0), pitch=(0.0, 0.0), yaw=(0.0, 0.0)
@@ -177,6 +177,8 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=mdp.joint_vel_rel)
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame)
+        object_pose = ObsTerm(func=mdp.object_pose_obs)
+
         target_object_position = ObsTerm(func=mdp.generated_commands, params={"command_name": "object_pose"})
         actions = ObsTerm(func=mdp.last_action)
 
