@@ -30,7 +30,7 @@ Z1_CFG = ArticulationCfg(
         #     os.path.expanduser("~"),
         #     "IsaacLab/source/extensions/omni.isaac.lab_assets/omni/isaac/lab_assets/Robots/Unitree/Z1/z1_gripper_small_joint6.usd",
         # ),
-        usd_path=os.path.join(os.path.expanduser("~"), "Downloads/z1_gripper_small_joint6_small_joint2_0.35.usd"),
+        usd_path=os.path.join(os.path.expanduser("~"), "Downloads/z1_gripper_small_joint6.usd"),
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
