@@ -11,7 +11,7 @@ from omni.isaac.lab.markers import VisualizationMarkersCfg
 from omni.isaac.lab.markers.config import BLUE_ARROW_X_MARKER_CFG, FRAME_MARKER_CFG, GREEN_ARROW_X_MARKER_CFG
 from omni.isaac.lab.utils import configclass
 
-from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table.markers.config import DISC_MARKER_CFG
+from omni.isaac.lab_tasks.manager_based.manipulation.z1_place_to_table_part1.markers.config import DISC_MARKER_CFG
 
 from .null_command import NullCommand
 from .pose_2d_command import TerrainBasedPose2dCommand, UniformPose2dCommand

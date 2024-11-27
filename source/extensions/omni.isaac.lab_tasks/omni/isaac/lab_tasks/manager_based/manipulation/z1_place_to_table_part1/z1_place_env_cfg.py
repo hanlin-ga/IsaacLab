@@ -106,9 +106,6 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     cabinet_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Cabinet/.*", history_length=3, track_air_time=True)
-    # object_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Object/.*", history_length=3, track_air_time=True)
-    # table_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Table/.*", history_length=3, track_air_time=True)
-    # robot_contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Robot/z1_description/.*", history_length=3, track_air_time=True)
 
     # plane
     plane = AssetBaseCfg(
@@ -226,9 +223,13 @@ class EventCfg:
 class RewardsCfg:
     """Reward terms for the MDP."""
 
+    # need a reward term for holding the object
     reaching_object = RewTerm(func=mdp.object_ee_distance, params={"std": 0.1, "delta_z": 0.094, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=1.0)
+    
+    # need a reward term for the object to be lifted
     lifting_object = RewTerm(func=mdp.object_is_lifted, params={"minimal_height": 0.9575, "delta_z": 0.094, "distance_threshold": 0.03, "command_name": "disc_pose"}, weight=15.0)
 
+    # need a reward term for the object to be placed on the red disk
     object_goal_tracking = RewTerm(
         func=mdp.object_goal_distance_six_joint,
         params={"std": 0.3, "delta_z": 0.08, "distance_threshold": 0.03, "minimal_height": 0.9575, "command_name": "disc_pose"},
@@ -240,7 +241,7 @@ class RewardsCfg:
         params={"std": 0.05, "delta_z": 0.08, "distance_threshold": 0.03, "minimal_height": 0.9575, "command_name": "disc_pose"},
         weight=5.0,
     )
-    # action penalty
+    # reward term for action rate penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-1e-4)
 
     joint_vel = RewTerm(
@@ -255,16 +256,10 @@ class RewardsCfg:
         params={"sensor_cfg": SceneEntityCfg("cabinet_contact_forces", body_names="sektion"), "threshold": 50, "ID": "cabinet_sektion"},
     )
 
+    #  reward term for keeping the object vertical
     object_goal_orien_diff = RewTerm(func=mdp.object_goal_orientation_diff_rew, 
                                      weight=-5.0,
                                      params={"delta_angle": 0.17})
-
-    # object_undesired_contacts = RewTerm(
-    #     func=mdp.undesired_contacts_xy,
-    #     weight=10.0,
-    #     params={"delta_z": 0.094, "distance_threshold": 0.05, "std": 10.0,"command_name": "disc_pose", "sensor_cfg": SceneEntityCfg("object_contact_forces"), "force_threshold": 50, "ID": "object"},
-    # )
-    # release_reward = RewTerm(func=mdp.release_reward, params={"delta_z": 0.094, "distance_threshold": 0.05, "command_name": "disc_pose"}, weight=1000.0)
 
 
 @configclass
@@ -283,7 +278,7 @@ class TerminationsCfg:
         params={"distance_threshold": 0.02, 
                 "angle_threshold": 0.17, 
                 "minimal_height": 0.9775, 
-                "record_data": "True", 
+                "record_data": "False", 
                 "MAX_RECORDS": 220000}
     )
 
@@ -299,18 +294,6 @@ class CurriculumCfg:
         func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1e-1, "num_steps": 10000}
     )
 
-    # joint_pos = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "joint_pos", "weight": -1e-1, "num_steps": 10000}
-    # )
-
-
-    # joint_vel1 = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "joint_vel", "weight": -1, "num_steps": 50000}
-    # )
-
-    # final_joint_vel = CurrTerm(
-    #     func=mdp.modify_reward_weight, params={"term_name": "final_joint_vel", "weight": -1e-3, "num_steps": 10000}
-    # )
 
 
 ##
