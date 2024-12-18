@@ -183,7 +183,7 @@ class RslRlVecEnvWrapper(VecEnv):
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
         second_dones = self.env.get_reset_buf_id()
-        print("second_dones : ", second_dones)
+        # print("second_dones : ", second_dones)
         
         self.step_counter += 1
         # print("terminated : ", terminated)

@@ -106,7 +106,8 @@ def main():
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
     ########################################################################################################################
     # load previously trained model
-    resume_path_one = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part1/2024-11-14_18-14-57_step2_place_part1_2000_gain_soda_can_oriendiff_weight5_action_rate_10_straight_episode_7_no_vibrate_best/model_44997.pt"
+    # resume_path_one = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part1/2024-11-14_18-14-57_step2_place_part1_2000_gain_soda_can_oriendiff_weight5_action_rate_10_straight_episode_7_no_vibrate_best/model_44997.pt"
+    resume_path_one = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part1/2024-12-16_09-50-02_place_part1_new_pd_gain_slow_joint_velocity_without_clip_good/model_12400.pt"
     ppo_runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
     ppo_runner.load(resume_path_one)
 
@@ -115,7 +116,9 @@ def main():
 
 
     ########################################################################################################################
-    resume_path_two = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part2/2024-11-14_17-52-58_step4_release_and_return_no_release_reward_action_rate_10_episode12_no_shake_best/model_59996.pt"
+    # resume_path_two = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part2/2024-11-14_17-52-58_step4_release_and_return_no_release_reward_action_rate_10_episode12_no_shake_best/model_59996.pt"
+    resume_path_two = "/home/hanlin/IsaacLab/logs/rsl_rl/z1_place_to_table_part2/2024-12-17_10-08-10_step2_release_and_return_no_clip_action_rate_10_no_vibration_best/model_23800.pt"
+
     ppo_runner_two = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
     ppo_runner_two.load(resume_path_two)
     policy_two = ppo_runner_two.get_inference_policy(device=env.unwrapped.device)
@@ -146,7 +149,6 @@ def main():
             actions = current_policy(obs)
             # env stepping
             obs, _, dones, _, second_dones = env.step(actions)
-            print("dones: ", dones)
             # print("dones: ", dones)
             if dones.item() == 1 and policy_indicator == 1:
                 current_policy = policy_two
@@ -155,7 +157,8 @@ def main():
                 current_policy = policy
                 policy_indicator = 1
                 print("this is processed")
-            print("policy_indicator: ", policy_indicator)
+
+            # print("policy_indicator: ", policy_indicator)
 
         if args_cli.video:
             timestep += 1

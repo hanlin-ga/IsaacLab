@@ -207,11 +207,11 @@ class TerminationManager(ManagerBase):
                 else:
                     self._terminated_buf |= value
 
-                print("name : ", name)
-                print("term_cfg.time_out : ", term_cfg.time_out)
-                print("original value : ", value)
-                print("original self._truncated_buf : ", self._truncated_buf)
-                print("original self._terminated_buf : ", self._terminated_buf)
+                # print("name : ", name)
+                # print("term_cfg.time_out : ", term_cfg.time_out)
+                # print("original value : ", value)
+                # print("original self._truncated_buf : ", self._truncated_buf)
+                # print("original self._terminated_buf : ", self._terminated_buf)
                 # add to episode dones
                 self._term_dones[name][:] = value
         # return combined termination signal
@@ -239,10 +239,10 @@ class TerminationManager(ManagerBase):
                 else:
                     self._terminated_id_buf |= value
 
-                print("str name : ", name)
-                print("id value : ", value)
-                print("self._truncated_id_buf : ", self._truncated_id_buf)
-                print("self._terminated_id_buf : ", self._terminated_id_buf)
+                # print("str name : ", name)
+                # print("id value : ", value)
+                # print("self._truncated_id_buf : ", self._truncated_id_buf)
+                # print("self._terminated_id_buf : ", self._terminated_id_buf)
                 # add to episode dones
                 self._term_dones[name][:] = value
         # return combined termination signal

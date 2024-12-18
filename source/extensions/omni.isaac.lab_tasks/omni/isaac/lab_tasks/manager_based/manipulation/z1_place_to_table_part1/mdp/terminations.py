@@ -88,7 +88,7 @@ def terminate_object_goal_distance_record_data(
     des_pos_w = disc.data.root_pos_w[:, :3].clone()
     des_pos_w[:, 2] = minimal_height
     distance = torch.norm(des_pos_w - object.data.root_pos_w[:, :3], dim=1)
-    print("distance is ", distance)
+    # print("distance is ", distance)
 
     condition1 = distance < distance_threshold
 

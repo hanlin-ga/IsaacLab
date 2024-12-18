@@ -57,43 +57,43 @@ Z1_CFG = ArticulationCfg(
             joint_names_expr=["joint[1]"],
             effort_limit=30.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=20,
+            stiffness=251,
+            damping=25.1,
         ),
         "joint2": ImplicitActuatorCfg(
             joint_names_expr=["joint[2]"],
             effort_limit=60.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=30,
+            stiffness=324,
+            damping=126,
         ),
         "joint3": ImplicitActuatorCfg(
             joint_names_expr=["joint[3]"],
             effort_limit=30.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=30,
+            stiffness=91.2,
+            damping=10,  # 100
         ),
         "joint4": ImplicitActuatorCfg(
             joint_names_expr=["joint[4]"],
             effort_limit=30.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=20,
+            stiffness=251,
+            damping=25.1,
         ),
         "joint5": ImplicitActuatorCfg(
             joint_names_expr=["joint[5]"],
             effort_limit=30.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=15,
+            stiffness=631.0,
+            damping=63.1,
         ),
         "joint6": ImplicitActuatorCfg(
             joint_names_expr=["joint[6]"],
             effort_limit=30.0,
             velocity_limit=0.349,
-            stiffness=2000,
-            damping=10,
+            stiffness=631.0,
+            damping=63.1,
         ),
         "z1_hand": ImplicitActuatorCfg(  # range[0, 0.04]
             joint_names_expr=["finger_.*"],
@@ -107,3 +107,4 @@ Z1_CFG = ArticulationCfg(
 """Configuration of Z1 robot."""
 
 Z1_HIGH_PD_CFG = Z1_CFG.copy()
+ 

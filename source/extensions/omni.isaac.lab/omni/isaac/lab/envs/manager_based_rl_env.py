@@ -156,7 +156,7 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             A tuple containing the observations, rewards, resets (terminated and truncated) and extras.
         """
         # clip the action to be the range of the action space
-        action = self.clip_action(action)
+        # action = self.clip_action(action)
         
         # process actions
         self.action_manager.process_action(action.to(self.device))
