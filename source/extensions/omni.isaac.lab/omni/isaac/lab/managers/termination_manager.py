@@ -62,8 +62,12 @@ class TerminationManager(ManagerBase):
         self._truncated_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
         self._terminated_buf = torch.zeros_like(self._truncated_buf)
 
-        self._truncated_id_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
-        self._terminated_id_buf = torch.zeros_like(self._truncated_id_buf)
+        self._truncated_first_id_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
+        self._terminated_first_id_buf = torch.zeros_like(self._truncated_first_id_buf)
+
+        self._truncated_second_id_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
+        self._terminated_second_id_buf = torch.zeros_like(self._truncated_second_id_buf)
+
 
     def __str__(self) -> str:
         """Returns: A string representation for termination manager."""
@@ -158,7 +162,7 @@ class TerminationManager(ManagerBase):
         self._truncated_buf[:] = False
         self._terminated_buf[:] = False
 
-        print("*"*50)
+        # print("*"*50)
         # iterate over all the termination terms
         for name, term_cfg in zip(self._term_names, self._term_cfgs):
             value = term_cfg.func(self._env, **term_cfg.params)
@@ -183,7 +187,7 @@ class TerminationManager(ManagerBase):
         # return combined termination signal
         return self._truncated_buf | self._terminated_buf
 
-    def compute_not_name_id(self, name_id: str) -> torch.Tensor:
+    def compute_not_name_id(self, name_id: list[str]) -> torch.Tensor:
         """Computes the termination signal as union of individual terms.
 
         This function calls each termination term managed by the class and performs a logical OR operation
@@ -198,8 +202,8 @@ class TerminationManager(ManagerBase):
         
         # iterate over all the termination terms
         for name, term_cfg in zip(self._term_names, self._term_cfgs):
-            print("*"*50)
-            if name != name_id:
+            # print("*"*50)
+            if name not in name_id: 
                 value = term_cfg.func(self._env, **term_cfg.params)
                
                 if term_cfg.time_out:
@@ -217,37 +221,48 @@ class TerminationManager(ManagerBase):
         # return combined termination signal
         return self._truncated_buf | self._terminated_buf
     
-    def compute_name_id(self, name_id: str) -> torch.Tensor:
-        """Computes the termination signal as union of individual terms.
-
-        This function calls each termination term managed by the class and performs a logical OR operation
-        to compute the net termination signal.
-
-        Returns:
-            The combined termination signal of shape (num_envs,).
-        """
+    def compute_first_name_id(self, name_id: str) -> torch.Tensor:
         # reset computation
-        self._truncated_id_buf[:] = False
-        self._terminated_id_buf[:] = False
+        self._truncated_first_id_buf[:] = False
+        self._terminated_first_id_buf[:] = False
         # iterate over all the termination terms
         for name, term_cfg in zip(self._term_names, self._term_cfgs):
             if name == name_id:
                 value = term_cfg.func(self._env, **term_cfg.params)
                
                 if term_cfg.time_out:
-                    self._truncated_id_buf |= value
+                    self._truncated_first_id_buf |= value
                 else:
-                    self._terminated_id_buf |= value
-
-                # print("str name : ", name)
-                # print("id value : ", value)
-                # print("self._truncated_id_buf : ", self._truncated_id_buf)
-                # print("self._terminated_id_buf : ", self._terminated_id_buf)
-                # add to episode dones
+                    self._terminated_first_id_buf |= value
                 self._term_dones[name][:] = value
+
         # return combined termination signal
-        return self._truncated_id_buf | self._terminated_id_buf
+        return self._truncated_first_id_buf | self._terminated_first_id_buf
     
+    def compute_second_name_id(self, name_id: str) -> torch.Tensor:
+        # reset computation
+        self._truncated_second_id_buf[:] = False
+        self._terminated_second_id_buf[:] = False
+        # iterate over all the termination terms
+        for name, term_cfg in zip(self._term_names, self._term_cfgs):
+            if name == name_id:
+                value = term_cfg.func(self._env, **term_cfg.params)
+               
+                if term_cfg.time_out:
+                    self._truncated_second_id_buf |= value
+                else:
+                    self._terminated_second_id_buf |= value
+
+                self._term_dones[name][:] = value
+
+        self._truncated_buf = self._truncated_second_id_buf
+        self._terminated_buf = self._terminated_second_id_buf
+
+        # return combined termination signal
+        return self._truncated_second_id_buf | self._terminated_second_id_buf
+    
+
+
     def get_term(self, name: str) -> torch.Tensor:
         """Returns the termination term with the specified name.
 

@@ -118,18 +118,18 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     )
 
     # camera
-    # camera = CameraCfg(
-    #     prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
-    #     update_period=0.0333,
-    #     height=360,
-    #     width=640,
-    #     data_types=["rgb"],
-    #     # data_types=["rgb", "distance_to_image_plane"],
-    #     spawn=sim_utils.PinholeCameraCfg(
-    #         focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
-    #     ),
-    #     offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
-    # )
+    camera = CameraCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/z1_description/wrist_cam_link/camera",
+        update_period=0.0333,
+        height=360,
+        width=640,
+        data_types=["rgb"],
+        # data_types=["rgb", "distance_to_image_plane"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=1.0, focus_distance=400.0, horizontal_aperture=2.0, clipping_range=(0.1, 10)
+        ),
+        offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+    )
 
     # lights
     light = AssetBaseCfg(
@@ -200,6 +200,7 @@ class ObservationsCfg:
         def __post_init__(self):
             self.enable_corruption = True
             self.concatenate_terms = True
+
 
     # observation groups
     policy: PolicyCfg = PolicyCfg()
@@ -358,4 +359,10 @@ class Z1PlaceEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
  
- 
+        self.viewer.eye = (1.5, 1, 1.0)
+        self.viewer.lookat = (0.0, 0.0, 0.0)
+        self.viewer.cam_prim_path = "/World/envs/env_0/Robot/z1_description/wrist_cam_link/camera"
+        self.viewer.origin_type = "asset_root"
+        self.viewer.env_index = 0
+        self.viewer.asset_name = "robot"
+

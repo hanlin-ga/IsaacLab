@@ -182,8 +182,12 @@ class RslRlVecEnvWrapper(VecEnv):
     def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict, torch.Tensor]:
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
-        second_dones = self.env.get_reset_buf_id()
+
+        first_dones = self.env.get_reset_buf_first_policy_id()
+        second_dones = self.env.get_reset_buf_second_policy_id()
+
         # print("second_dones : ", second_dones)
+        # print("first_dones : ", first_dones)
         
         self.step_counter += 1
         # print("terminated : ", terminated)
@@ -222,7 +226,7 @@ class RslRlVecEnvWrapper(VecEnv):
             self.step_counter = 0
 
         # return the step information
-        return obs, rew, dones, extras, second_dones
+        return obs, rew, dones, extras, first_dones, second_dones
 
     def close(self):  # noqa: D102
         return self.env.close()

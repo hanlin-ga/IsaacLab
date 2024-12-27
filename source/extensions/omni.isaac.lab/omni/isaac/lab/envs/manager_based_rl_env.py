@@ -190,8 +190,10 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         # self.reset_buf = self.termination_manager.compute()
         
         # -- check if the object and each joint have arrived at the goal position
-        self.reset_buf = self.termination_manager.compute_not_name_id(name_id="object_joint_arrive")
-        self.reset_buf_id = self.termination_manager.compute_name_id(name_id="object_joint_arrive")
+        self.reset_buf = self.termination_manager.compute_not_name_id(name_id=["object_arrive", "object_joint_arrive"])
+        
+        self.reset_buf_first_policy = self.termination_manager.compute_first_name_id(name_id="object_arrive")
+        self.reset_buf_second_policy = self.termination_manager.compute_second_name_id(name_id="object_joint_arrive")
 
 
         self.reset_terminated = self.termination_manager.terminated
@@ -202,13 +204,13 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         # -- reset envs that terminated/timed-out and log the episode information
         # reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
 
-        self.reset_buf_id = self.reset_buf_id  |  self.reset_time_outs 
+        self.reset_buf_id = self.reset_buf_second_policy  |  self.reset_time_outs 
         reset_env_ids = self.reset_buf_id.nonzero(as_tuple=False).squeeze(-1)  
         if len(reset_env_ids) > 0:
-            print("*"*50)
-            print("*"*50)
-            print("*"*50)
-            print("reset_env_ids: ", reset_env_ids)
+            # print("*"*50)
+            # print("*"*50)
+            # print("*"*50)
+            # print("reset_env_ids: ", reset_env_ids)
             self._reset_idx(reset_env_ids)
             # if sensors are added to the scene, make sure we render to reflect changes in reset
             if self.sim.has_rtx_sensors() and self.cfg.rerender_on_reset:
@@ -220,11 +222,18 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         if "interval" in self.event_manager.available_modes:
             self.event_manager.apply(mode="interval", dt=self.step_dt)
         # -- compute observations
-        # note: done after reset to get the correct observations for reset envs
+        # note: done after reset to get the correct observations for reset envsW
         self.obs_buf = self.observation_manager.compute()
 
         # return observations, rewards, resets and extras
+        # return self.obs_buf, self.reward_buf, self.reset_terminated, self.reset_time_outs, self.extras
         return self.obs_buf, self.reward_buf, self.reset_terminated, self.reset_time_outs, self.extras
+    
+    def get_reset_buf_first_policy_id(self):
+        return self.reset_buf_first_policy
+    
+    def get_reset_buf_second_policy_id(self):
+        return self.reset_buf_second_policy
     
     def get_reset_buf_id(self):
         return self.reset_buf_id

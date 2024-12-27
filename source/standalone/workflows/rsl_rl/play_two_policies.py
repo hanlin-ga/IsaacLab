@@ -148,9 +148,9 @@ def main():
             # agent stepping
             actions = current_policy(obs)
             # env stepping
-            obs, _, dones, _, second_dones = env.step(actions)
+            obs, _, dones, _,first_dones, second_dones = env.step(actions)
             # print("dones: ", dones)
-            if dones.item() == 1 and policy_indicator == 1:
+            if first_dones.item() == 1 and policy_indicator == 1:
                 current_policy = policy_two
                 policy_indicator = 2
             elif second_dones.item() == 1 and policy_indicator == 2:
@@ -164,6 +164,8 @@ def main():
             timestep += 1
             # Exit the play loop after recording one video
             if timestep == args_cli.video_length:
+                break
+            if second_dones == 1:
                 break
 
     # close the simulator
