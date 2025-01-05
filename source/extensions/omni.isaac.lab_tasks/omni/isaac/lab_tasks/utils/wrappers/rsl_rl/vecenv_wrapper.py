@@ -14,7 +14,7 @@ The following example shows how to wrap an environment for RSL-RL:
     env = RslRlVecEnvWrapper(env)
 
 """
-
+import numpy as np
 
 import gymnasium as gym
 import torch
@@ -22,10 +22,9 @@ import torch
 from rsl_rl.env import VecEnv
 
 from omni.isaac.lab.envs import DirectRLEnv, ManagerBasedRLEnv
-
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.sensors import FrameTransformer
-import time
+
 
 class RslRlVecEnvWrapper(VecEnv):
     """Wraps around Isaac Lab environment for RSL-RL library
@@ -59,7 +58,9 @@ class RslRlVecEnvWrapper(VecEnv):
             ValueError: When the environment is not an instance of :class:`ManagerBasedRLEnv` or :class:`DirectRLEnv`.
         """
         # check that input is valid
-        if not isinstance(env.unwrapped, ManagerBasedRLEnv) and not isinstance(env.unwrapped, DirectRLEnv):
+        if not isinstance(env.unwrapped, ManagerBasedRLEnv) and not isinstance(
+            env.unwrapped, DirectRLEnv
+        ):
             raise ValueError(
                 "The environment must be inherited from ManagerBasedRLEnv or DirectRLEnv. Environment type:"
                 f" {type(env)}"
@@ -83,17 +84,15 @@ class RslRlVecEnvWrapper(VecEnv):
             hasattr(self.unwrapped, "observation_manager")
             and "critic" in self.unwrapped.observation_manager.group_obs_dim
         ):
-            self.num_privileged_obs = self.unwrapped.observation_manager.group_obs_dim["critic"][0]
+            self.num_privileged_obs = self.unwrapped.observation_manager.group_obs_dim[
+                "critic"
+            ][0]
         elif hasattr(self.unwrapped, "num_states"):
             self.num_privileged_obs = self.unwrapped.num_states
         else:
             self.num_privileged_obs = 0
         # reset at the start since the RSL-RL runner does not call reset
         self.env.reset()
-
-        # Initialize the last terminated time to None
-        self.last_terminated_time = None
-        self.step_counter = 0
 
     def __str__(self):
         """Returns the wrapper name and the :attr:`env` representation string."""
@@ -144,13 +143,25 @@ class RslRlVecEnvWrapper(VecEnv):
     Properties
     """
 
-    def get_observations(self) -> tuple[torch.Tensor, dict]:
+    def get_observations(
+        self, return_extras: bool = False
+    ) -> tuple[torch.Tensor, dict]:
         """Returns the current observations of the environment."""
         if hasattr(self.unwrapped, "observation_manager"):
             obs_dict = self.unwrapped.observation_manager.compute()
         else:
             obs_dict = self.unwrapped._get_observations()
-        return obs_dict["policy"], {"observations": obs_dict}
+
+        extras = {}
+        imgs = self.env.render_all_cameras("rgb_array")
+        ee_pose = self.obtain_cam_pos()
+        extras["imgs"] = imgs
+        extras["ee_pose"] = ee_pose
+
+        if return_extras:
+            return obs_dict["policy"], {"observations": obs_dict}, extras
+        else:
+            return obs_dict["policy"], {"observations": obs_dict}
 
     @property
     def episode_length_buf(self) -> torch.Tensor:
@@ -175,16 +186,21 @@ class RslRlVecEnvWrapper(VecEnv):
 
     def reset(self) -> tuple[torch.Tensor, dict]:  # noqa: D102
         # reset the environment
-        obs_dict, _ = self.env.reset()
-        # return observations
-        return obs_dict["policy"], {"observations": obs_dict}
+        obs_dict, extras = self.env.reset()
 
-    def step(self, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
+        imgs = self.env.render_all_cameras("rgb_array")
+        ee_pose = self.obtain_cam_pos()
+        extras["imgs"] = imgs
+        extras["ee_pose"] = ee_pose
+
+        # return observations
+        return obs_dict["policy"], {"observations": obs_dict}, extras
+
+    def step(
+        self, actions: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
         # record step information
         obs_dict, rew, terminated, truncated, extras = self.env.step(actions)
-        self.step_counter += 1
-        # print("terminated : ", terminated)
-        # print("truncated : ", truncated)  
         # compute dones for compatibility with RSL-RL
         dones = (terminated | truncated).to(dtype=torch.long)
         # move extra observations to the extras dict
@@ -195,35 +211,28 @@ class RslRlVecEnvWrapper(VecEnv):
         if not self.unwrapped.cfg.is_finite_horizon:
             extras["time_outs"] = truncated
 
-        # images = self.env.render_all_cameras("rgb_array")
-        # print("images : ", images.shape)
-        # ee_pos_source, ee_quat_source = self.obtain_cam_pos()
-        # print("ee_pos_source : ", ee_pos_source[0, :])
-        # print("ee_quat_source : ", ee_quat_source[0, :])
+        imgs = self.env.render_all_cameras("rgb_array")
+        ee_pose = self.obtain_cam_pos()
+        extras["imgs"] = imgs
+        extras["ee_pose"] = ee_pose
 
-        # Timer logic for measuring the time between terminated events
-        current_time = time.time()  # Get the current time
-        
-        if terminated.any():  # If any environment is terminated
-            if self.last_terminated_time is not None:
-                time_difference = current_time - self.last_terminated_time
-                # print(f"Time since last termination: {time_difference} seconds")
-                # print(f"Time since last termination: {self.step_counter*0.02} seconds")
-            # Update the last terminated time to the current time
-            self.last_terminated_time = current_time
-            self.step_counter = 0
-
-        # return the step information
         return obs, rew, dones, extras
+
+    def obtain_cam_pos(
+        self, ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("wrist_cam_frame")
+    ):
+        wrist_cam_frame: FrameTransformer = self.env.scene[ee_frame_cfg.name]
+
+        ee_pos_source = wrist_cam_frame.data.target_pos_source[
+            ..., 0, :
+        ]  # Position relative to link00
+        ee_quat_source = wrist_cam_frame.data.target_quat_source[
+            ..., 0, :
+        ]  # Quaternion relative to link00
+
+        ee_pose = torch.cat((ee_pos_source, ee_quat_source), axis=-1)
+
+        return ee_pose
 
     def close(self):  # noqa: D102
         return self.env.close()
-    
-    def obtain_cam_pos(self, ee_frame_cfg: SceneEntityCfg = SceneEntityCfg("wrist_cam_frame"),):            # wrist_cam_link
-        wrist_cam_frame: FrameTransformer = self.env.scene[ee_frame_cfg.name]
-        # ee_pos_w = wrist_cam_frame.data.target_pos_w[..., 0, :]
-        # ee_quat_w = wrist_cam_frame.data.target_quat_w[..., 0, :]
-
-        ee_pos_source = wrist_cam_frame.data.target_pos_source[..., 0, :]   # this is the position of wrist_cam_frame relative to link00
-        ee_quat_source = wrist_cam_frame.data.target_quat_source[..., 0, :]
-        return ee_pos_source, ee_quat_source

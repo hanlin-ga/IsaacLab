@@ -15,7 +15,12 @@ from typing import Any, ClassVar
 
 from omni.isaac.version import get_version
 
-from omni.isaac.lab.managers import CommandManager, CurriculumManager, RewardManager, TerminationManager
+from omni.isaac.lab.managers import (
+    CommandManager,
+    CurriculumManager,
+    RewardManager,
+    TerminationManager,
+)
 
 from .common import VecEnvStepReturn
 from .manager_based_env import ManagerBasedEnv
@@ -63,7 +68,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
     cfg: ManagerBasedRLEnvCfg
     """Configuration for the environment."""
 
-    def __init__(self, cfg: ManagerBasedRLEnvCfg, render_mode: str | None = None, **kwargs):
+    def __init__(
+        self, cfg: ManagerBasedRLEnvCfg, render_mode: str | None = None, **kwargs
+    ):
         """Initialize the environment.
 
         Args:
@@ -80,7 +87,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         # -- counter for curriculum
         self.common_step_counter = 0
         # -- init buffers
-        self.episode_length_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        self.episode_length_buf = torch.zeros(
+            self.num_envs, device=self.device, dtype=torch.long
+        )
         # -- set the framerate of the gym video recorder wrapper so that the playback speed of the produced video matches the simulation
         self.metadata["render_fps"] = 1 / self.step_dt
 
@@ -155,9 +164,6 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         Returns:
             A tuple containing the observations, rewards, resets (terminated and truncated) and extras.
         """
-        # clip the action to be the range of the action space
-        action = self.clip_action(action)
-        
         # process actions
         self.action_manager.process_action(action.to(self.device))
 
@@ -177,7 +183,10 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             # render between steps only if the GUI or an RTX sensor needs it
             # note: we assume the render interval to be the shortest accepted rendering interval.
             #    If a camera needs rendering at a faster frequency, this will lead to unexpected behavior.
-            if self._sim_step_counter % self.cfg.sim.render_interval == 0 and is_rendering:
+            if (
+                self._sim_step_counter % self.cfg.sim.render_interval == 0
+                and is_rendering
+            ):
                 self.sim.render()
             # update buffers at sim dt
             self.scene.update(dt=self.physics_dt)
@@ -211,7 +220,13 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         self.obs_buf = self.observation_manager.compute()
 
         # return observations, rewards, resets and extras
-        return self.obs_buf, self.reward_buf, self.reset_terminated, self.reset_time_outs, self.extras
+        return (
+            self.obs_buf,
+            self.reward_buf,
+            self.reset_terminated,
+            self.reset_time_outs,
+            self.extras,
+        )
 
     def render(self, recompute: bool = False) -> np.ndarray | None:
         """Run rendering without stepping through the physics.
@@ -260,7 +275,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
                     self.cfg.viewer.cam_prim_path, self.cfg.viewer.resolution
                 )
                 # create rgb annotator -- used to read data from the render product
-                self._rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                self._rgb_annotator = rep.AnnotatorRegistry.get_annotator(
+                    "rgb", device="cpu"
+                )
                 self._rgb_annotator.attach([self._render_product])
             # obtain the rgb data
             rgb_data = self._rgb_annotator.get_data()
@@ -269,7 +286,10 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
             # return the rgb data
             # note: initially the renerer is warming up and returns empty data
             if rgb_data.size == 0:
-                return np.zeros((self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3), dtype=np.uint8)
+                return np.zeros(
+                    (self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3),
+                    dtype=np.uint8,
+                )
             else:
                 return rgb_data[:, :, :3]
         else:
@@ -316,12 +336,12 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
                     " If running headless, make sure --enable_cameras is set."
                 )
             # create the annotator if it does not exist
-            if not hasattr(self, "_rgb_annotator"):
+            if not hasattr(self, "_rgb_annotators"):
                 import omni.replicator.core as rep
 
                 self._render_products = []
                 self._rgb_annotators = []
-                
+
                 # Loop through each environment and create a render product and annotator
                 for e in range(self.num_envs):
                     render_product = rep.create.render_product(
@@ -331,10 +351,11 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
                     self._render_products.append(render_product)
 
                     # Create RGB annotator for each environment and attach the render product
-                    rgb_annotator = rep.AnnotatorRegistry.get_annotator("rgb", device="cpu")
+                    rgb_annotator = rep.AnnotatorRegistry.get_annotator(
+                        "rgb", device="cpu"
+                    )
                     rgb_annotator.attach([render_product])
                     self._rgb_annotators.append(rgb_annotator)
-
 
             rgb_data_list = []
 
@@ -344,30 +365,38 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
 
                 # Check if the rgb_data buffer is empty
                 if rgb_data is None or len(rgb_data) == 0:
-                    # If no data, return a blank image
-                    rgb_data_list.append(
-                        np.zeros((self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 3), dtype=np.uint8)
+
+                    rgb_data = np.zeros(
+                        (
+                            self.cfg.viewer.resolution[1],
+                            self.cfg.viewer.resolution[0],
+                            3,
+                        ),
+                        dtype=np.uint8,
                     )
-                    print(f"Warning: No data for environment {e}. Returning a blank image.")
+                    rgb_data_list.append(rgb_data)
+
                 else:
                     # Convert the buffer to a numpy array and reshape
                     rgb_data = np.frombuffer(rgb_data, dtype=np.uint8).reshape(
-                        (self.cfg.viewer.resolution[1], self.cfg.viewer.resolution[0], 4)  # Assuming RGBA output
+                        (
+                            self.cfg.viewer.resolution[1],
+                            self.cfg.viewer.resolution[0],
+                            4,
+                        )  # Assuming RGBA output
                     )
                     # Extract RGB channels (ignore alpha)
-                    rgb_data_list.append(rgb_data[:, :, :3])
+                    rgb_data = rgb_data[:, :, :3]
+                    rgb_data_list.append(rgb_data)
 
             rgb_data_batch = np.stack(rgb_data_list, axis=0)
 
-            # The shape of rgb_data_batch will be (num_envs, height, width, 3)
-            # print("rgb_data_batch shape:", rgb_data_batch.shape)
-            # print("Number 0 camera rgb_data is :", rgb_data_batch[0,:,:,:])
             return rgb_data_batch
         else:
             raise NotImplementedError(
                 f"Render mode '{self.render_mode}' is not supported. Please use: {self.metadata['render_modes']}."
             )
-           
+
     def close(self):
         if not self._is_closed:
             # destructor is order-sensitive
@@ -386,26 +415,43 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         """Configure the action and observation spaces for the Gym environment."""
         # observation space (unbounded since we don't impose any limits)
         self.single_observation_space = gym.spaces.Dict()
-        for group_name, group_term_names in self.observation_manager.active_terms.items():
+        for (
+            group_name,
+            group_term_names,
+        ) in self.observation_manager.active_terms.items():
             # extract quantities about the group
-            has_concatenated_obs = self.observation_manager.group_obs_concatenate[group_name]
+            has_concatenated_obs = self.observation_manager.group_obs_concatenate[
+                group_name
+            ]
             group_dim = self.observation_manager.group_obs_dim[group_name]
             # check if group is concatenated or not
             # if not concatenated, then we need to add each term separately as a dictionary
             if has_concatenated_obs:
-                self.single_observation_space[group_name] = gym.spaces.Box(low=-np.inf, high=np.inf, shape=group_dim)
+                self.single_observation_space[group_name] = gym.spaces.Box(
+                    low=-np.inf, high=np.inf, shape=group_dim
+                )
             else:
-                self.single_observation_space[group_name] = gym.spaces.Dict({
-                    term_name: gym.spaces.Box(low=-np.inf, high=np.inf, shape=term_dim)
-                    for term_name, term_dim in zip(group_term_names, group_dim)
-                })
+                self.single_observation_space[group_name] = gym.spaces.Dict(
+                    {
+                        term_name: gym.spaces.Box(
+                            low=-np.inf, high=np.inf, shape=term_dim
+                        )
+                        for term_name, term_dim in zip(group_term_names, group_dim)
+                    }
+                )
         # action space (unbounded since we don't impose any limits)
         action_dim = sum(self.action_manager.action_term_dim)
-        self.single_action_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(action_dim,))
+        self.single_action_space = gym.spaces.Box(
+            low=-np.inf, high=np.inf, shape=(action_dim,)
+        )
 
         # batch the spaces for vectorized environments
-        self.observation_space = gym.vector.utils.batch_space(self.single_observation_space, self.num_envs)
-        self.action_space = gym.vector.utils.batch_space(self.single_action_space, self.num_envs)
+        self.observation_space = gym.vector.utils.batch_space(
+            self.single_observation_space, self.num_envs
+        )
+        self.action_space = gym.vector.utils.batch_space(
+            self.single_action_space, self.num_envs
+        )
 
     def _reset_idx(self, env_ids: Sequence[int]):
         """Reset environments based on specified indices.
@@ -420,7 +466,9 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         # apply events such as randomizations for environments that need a reset
         if "reset" in self.event_manager.available_modes:
             env_step_count = self._sim_step_counter // self.cfg.decimation
-            self.event_manager.apply(mode="reset", env_ids=env_ids, global_env_step_count=env_step_count)
+            self.event_manager.apply(
+                mode="reset", env_ids=env_ids, global_env_step_count=env_step_count
+            )
 
         # iterate over all managers and reset them
         # this returns a dictionary of information which is stored in the extras
@@ -461,14 +509,22 @@ class ManagerBasedRLEnv(ManagerBasedEnv, gym.Env):
         The clipped action.
         """
         device = action.device
-        action_lower_bound = torch.tensor([[-2.6180,  0.0000, -2.8798, -1.5184, -1.3439, -0.1745]], device=device)
-        action_upper_bound = torch.tensor([[2.6180, 2.9671, 0.0000, 1.5184, 1.3439, 0.1745]], device=device)
-        default_action = torch.tensor([0.0000,  0.8000, -0.7000,  0.2000,  0.0000,  0.0000], device=device)
+        action_lower_bound = torch.tensor(
+            [[-2.6180, 0.0000, -2.8798, -1.5184, -1.3439, -0.1745]], device=device
+        )
+        action_upper_bound = torch.tensor(
+            [[2.6180, 2.9671, 0.0000, 1.5184, 1.3439, 0.1745]], device=device
+        )
+        default_action = torch.tensor(
+            [0.0000, 0.8000, -0.7000, 0.2000, 0.0000, 0.0000], device=device
+        )
 
         new_action_lower_bound = (action_lower_bound - default_action) * 2
         new_action_upper_bound = (action_upper_bound - default_action) * 2
 
         # Clip only the first six elements of the action
-        clipped_action = torch.clip(action[:, :6], new_action_lower_bound, new_action_upper_bound)
+        clipped_action = torch.clip(
+            action[:, :6], new_action_lower_bound, new_action_upper_bound
+        )
         # Concatenate the clipped first six elements with the unchanged last two elements
         return torch.cat((clipped_action, action[:, 6:]), dim=1)
